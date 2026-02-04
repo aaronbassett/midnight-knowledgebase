@@ -22,13 +22,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-*.so
-
 # Claude Code
 .claude/
 

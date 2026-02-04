@@ -1,0 +1,130 @@
+// Private Vault Contract
+// Demonstrates private state management with Compact
+
+import { persistentHash } from "std/compact/hashes";
+import { persistentCommit } from "std/compact/commitments";
+
+// =============================================================================
+// STATE
+// =============================================================================
+
+ledger {
+  // Owner's public key hash (for authentication)
+  owner: Bytes<32>;
+
+  // Deposits stored as commitments in Merkle tree
+  // Content is private, only root is public
+  deposits: MerkleTree<32, Bytes<32>>;
+
+  // Withdrawal nullifiers (prevents double-spend)
+  withdrawals: Set<Bytes<32>>;
+
+  // Public statistics (optional transparency)
+  total_deposits: Field;
+  total_withdrawals: Field;
+}
+
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
+
+export circuit initialize(owner_public_key: Bytes<32>): Void {
+  ledger.owner = owner_public_key;
+  ledger.total_deposits = 0;
+  ledger.total_withdrawals = 0;
+}
+
+// =============================================================================
+// DEPOSIT (Creates private commitment)
+// =============================================================================
+
+export witness deposit(
+  // Private inputs
+  amount: Field,
+  secret: Bytes<32>  // User's secret for this deposit
+): Void {
+  assert amount > 0;
+
+  // Create commitment: hides amount and secret
+  const commitment = persistentCommit(amount, secret);
+
+  // Store commitment (only this hash goes on-chain)
+  ledger.deposits.insert(commitment);
+
+  // Update public counter
+  ledger.total_deposits = ledger.total_deposits + 1;
+
+  // Receive actual tokens via Zswap
+  receive coins: Coin[];
+}
+
+// =============================================================================
+// WITHDRAW (Proves ownership without revealing which deposit)
+// =============================================================================
+
+export witness withdraw(
+  // Private inputs - never revealed
+  owner_secret: Bytes<32>,        // Proves ownership
+  deposit_amount: Field,          // Original deposit amount
+  deposit_secret: Bytes<32>,      // Original deposit secret
+  merkle_path: MerkleTreePath<32, Bytes<32>>  // Proves deposit exists
+): Void {
+  // 1. Authenticate owner
+  assert persistentHash(owner_secret) == ledger.owner;
+
+  // 2. Reconstruct the deposit commitment
+  const commitment = persistentCommit(deposit_amount, deposit_secret);
+
+  // 3. Prove commitment exists in deposits tree
+  assert ledger.deposits.member(commitment, merkle_path);
+
+  // 4. Compute withdrawal nullifier (prevents double-spend)
+  const nullifier = persistentHash(commitment, deposit_secret);
+
+  // 5. Ensure not already withdrawn
+  assert !ledger.withdrawals.member(nullifier);
+  ledger.withdrawals.insert(nullifier);
+
+  // 6. Update public counter
+  ledger.total_withdrawals = ledger.total_withdrawals + 1;
+
+  // 7. Send tokens back to owner via Zswap
+  // (address would come from witness in real implementation)
+}
+
+// =============================================================================
+// OWNER ACTIONS
+// =============================================================================
+
+export witness transferOwnership(
+  current_owner_secret: Bytes<32>,
+  new_owner_public_key: Bytes<32>
+): Void {
+  // Authenticate current owner
+  assert persistentHash(current_owner_secret) == ledger.owner;
+
+  // Transfer ownership
+  ledger.owner = new_owner_public_key;
+}
+
+// =============================================================================
+// PRIVACY ANALYSIS
+// =============================================================================
+
+// What's Private:
+// - Individual deposit amounts
+// - Deposit secrets
+// - Which deposit is being withdrawn
+// - Link between deposits and withdrawals
+
+// What's Public:
+// - Owner public key hash
+// - Total number of deposits
+// - Total number of withdrawals
+// - Merkle root of deposits (reveals nothing about contents)
+
+// What's Proven:
+// - Deposit commitment is valid (in tree)
+// - Withdrawer knows the secret
+// - No double-withdrawal (nullifier check)
+// - Owner authorized the action

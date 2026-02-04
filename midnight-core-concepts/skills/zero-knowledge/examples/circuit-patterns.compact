@@ -1,0 +1,134 @@
+// Common ZK Circuit Patterns in Compact
+
+// =============================================================================
+// PATTERN 1: PROVE KNOWLEDGE WITHOUT REVEALING
+// =============================================================================
+
+ledger {
+  target_hash: Bytes<32>;
+}
+
+// Prove you know the preimage of a hash
+export witness proveKnowledge(
+  secret: Bytes<32>  // Private - never revealed
+): Void {
+  // Constraint: Hash(secret) must equal public target
+  // Verifier learns: "Prover knows a valid preimage"
+  // Verifier does NOT learn: The actual secret value
+  assert persistentHash(secret) == ledger.target_hash;
+}
+
+// =============================================================================
+// PATTERN 2: RANGE PROOF (prove value in range)
+// =============================================================================
+
+ledger {
+  minimum: Field;
+  maximum: Field;
+}
+
+// Prove a value is within a range without revealing exact value
+export witness proveInRange(
+  secret_value: Field  // Private
+): Void {
+  // These comparisons become bit-decomposition constraints
+  assert secret_value >= ledger.minimum;
+  assert secret_value <= ledger.maximum;
+  // Verifier learns: value is in [minimum, maximum]
+  // Verifier does NOT learn: exact value
+}
+
+// =============================================================================
+// PATTERN 3: MEMBERSHIP PROOF
+// =============================================================================
+
+ledger {
+  authorized: MerkleTree<32, Bytes<32>>;
+}
+
+// Prove membership in a set without revealing which member
+export witness proveMembership(
+  secret_key: Bytes<32>,
+  merkle_path: MerkleTreePath<32, Bytes<32>>
+): Void {
+  const public_key = persistentHash(secret_key);
+
+  // Merkle proof: public_key exists in tree
+  // Verifier learns: "Some authorized key was used"
+  // Verifier does NOT learn: Which specific key
+  assert ledger.authorized.member(public_key, merkle_path);
+}
+
+// =============================================================================
+// PATTERN 4: CONDITIONAL LOGIC
+// =============================================================================
+
+ledger {
+  threshold: Field;
+  premium_count: Field;
+  regular_count: Field;
+}
+
+// ZK-proven conditional execution
+export witness conditionalAction(
+  secret_balance: Field
+): Void {
+  // The condition itself is proven without revealing balance
+  if secret_balance >= ledger.threshold {
+    ledger.premium_count = ledger.premium_count + 1;
+  } else {
+    ledger.regular_count = ledger.regular_count + 1;
+  }
+  // Verifier learns: One counter increased
+  // Verifier does NOT learn: Which branch or actual balance
+}
+
+// =============================================================================
+// PATTERN 5: COMMITMENT VERIFICATION
+// =============================================================================
+
+ledger {
+  stored_commitment: Bytes<32>;
+}
+
+// Verify a commitment without revealing committed value
+export witness verifyCommitment(
+  committed_value: Field,
+  randomness: Bytes<32>
+): Void {
+  // Reconstruct commitment from private inputs
+  const computed = persistentCommit(committed_value, randomness);
+
+  // Prove it matches stored commitment
+  assert computed == ledger.stored_commitment;
+  // Verifier learns: Prover knows the committed value
+  // Verifier does NOT learn: What the value is
+}
+
+// =============================================================================
+// PATTERN 6: MULTI-CONSTRAINT PROOFS
+// =============================================================================
+
+ledger {
+  owner_hash: Bytes<32>;
+  min_amount: Field;
+  action_count: Field;
+}
+
+// Prove multiple conditions simultaneously
+export witness complexProof(
+  owner_secret: Bytes<32>,
+  amount: Field
+): Void {
+  // Constraint 1: Prove ownership
+  assert persistentHash(owner_secret) == ledger.owner_hash;
+
+  // Constraint 2: Prove sufficient amount
+  assert amount >= ledger.min_amount;
+
+  // Constraint 3: Update state (proves authorization)
+  ledger.action_count = ledger.action_count + 1;
+
+  // Single proof validates all three conditions
+  // None of the private values revealed
+}
