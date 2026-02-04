@@ -1,0 +1,470 @@
+// time-locked.compact - Time-based logic examples
+// Demonstrates blockTime, blockTimeBefore, blockTimeAfter
+
+import {
+    blockTime,
+    blockTimeBefore,
+    blockTimeAfter,
+    Maybe
+} from "CompactStandardLibrary";
+
+// ============================================
+// Time Constants (in seconds)
+// ============================================
+
+const ONE_MINUTE: Uint<64> = 60;
+const ONE_HOUR: Uint<64> = 3600;
+const ONE_DAY: Uint<64> = 86400;
+const ONE_WEEK: Uint<64> = 604800;
+const ONE_MONTH: Uint<64> = 2592000;  // 30 days
+const ONE_YEAR: Uint<64> = 31536000;  // 365 days
+
+// ============================================
+// Basic Time Lock
+// ============================================
+
+struct TimeLock {
+    owner: Bytes<32>,
+    amount: Uint<64>,
+    unlock_time: Uint<64>
+}
+
+ledger time_locks: Map<Bytes<32>, TimeLock>;
+
+witness get_owner(): Bytes<32>;
+
+/// Create a time-locked deposit
+export circuit create_time_lock(
+    lock_id: Bytes<32>,
+    amount: Uint<64>,
+    duration: Uint<64>
+): Uint<64> {
+    const owner = get_owner();
+    const owner_disclosed = disclose(owner);
+
+    // Calculate unlock time
+    const unlock_at = blockTime() + duration;
+
+    const lock = TimeLock {
+        owner: owner_disclosed,
+        amount: amount,
+        unlock_time: unlock_at
+    };
+
+    time_locks.insert(lock_id, lock);
+
+    return unlock_at;
+}
+
+/// Withdraw from a time lock (after unlock time)
+export circuit withdraw_time_lock(lock_id: Bytes<32>): Uint<64> {
+    const caller = get_owner();
+    const caller_disclosed = disclose(caller);
+
+    // Get the lock
+    const lock_opt = time_locks.lookup(lock_id);
+    assert lock_opt is Maybe::Some(_), "Lock not found";
+
+    if lock_opt is Maybe::Some(lock) {
+        // Verify owner
+        assert lock.owner == caller_disclosed, "Not owner";
+
+        // CRITICAL: Enforce time lock
+        // This will FAIL the transaction if time hasn't passed
+        blockTimeAfter(lock.unlock_time);
+
+        // Clear the lock
+        time_locks.remove(lock_id);
+
+        return lock.amount;
+    }
+
+    return 0;
+}
+
+// ============================================
+// Auction with Deadlines
+// ============================================
+
+struct Auction {
+    seller: Bytes<32>,
+    item_id: Bytes<32>,
+    start_time: Uint<64>,
+    end_time: Uint<64>,
+    min_bid: Uint<64>,
+    highest_bid: Uint<64>,
+    highest_bidder: Bytes<32>,
+    settled: Boolean
+}
+
+ledger auctions: Map<Bytes<32>, Auction>;
+
+witness get_bidder(): Bytes<32>;
+
+/// Create an auction with time bounds
+export circuit create_auction(
+    auction_id: Bytes<32>,
+    item_id: Bytes<32>,
+    duration: Uint<64>,
+    min_bid: Uint<64>
+): [] {
+    const seller = get_owner();
+    const seller_disclosed = disclose(seller);
+
+    const now = blockTime();
+
+    const auction = Auction {
+        seller: seller_disclosed,
+        item_id: item_id,
+        start_time: now,
+        end_time: now + duration,
+        min_bid: min_bid,
+        highest_bid: 0,
+        highest_bidder: 0x0000000000000000000000000000000000000000000000000000000000000000,
+        settled: false
+    };
+
+    auctions.insert(auction_id, auction);
+}
+
+/// Place a bid (must be during auction period)
+export circuit place_bid(auction_id: Bytes<32>, bid_amount: Uint<64>): [] {
+    const bidder = get_bidder();
+    const bidder_disclosed = disclose(bidder);
+
+    const auction_opt = auctions.lookup(auction_id);
+    assert auction_opt is Maybe::Some(_), "Auction not found";
+
+    if auction_opt is Maybe::Some(auction) {
+        assert !auction.settled, "Auction already settled";
+
+        // MUST be after start time
+        blockTimeAfter(auction.start_time);
+
+        // MUST be before end time
+        blockTimeBefore(auction.end_time);
+
+        // Bid must exceed minimum and current highest
+        assert bid_amount >= auction.min_bid, "Bid below minimum";
+        assert bid_amount > auction.highest_bid, "Bid not high enough";
+
+        // Update auction
+        const updated = Auction {
+            seller: auction.seller,
+            item_id: auction.item_id,
+            start_time: auction.start_time,
+            end_time: auction.end_time,
+            min_bid: auction.min_bid,
+            highest_bid: bid_amount,
+            highest_bidder: bidder_disclosed,
+            settled: false
+        };
+
+        auctions.insert(auction_id, updated);
+    }
+}
+
+/// Settle auction (only after end time)
+export circuit settle_auction(auction_id: Bytes<32>): Bytes<32> {
+    const auction_opt = auctions.lookup(auction_id);
+    assert auction_opt is Maybe::Some(_), "Auction not found";
+
+    if auction_opt is Maybe::Some(auction) {
+        assert !auction.settled, "Already settled";
+
+        // MUST be after auction end
+        blockTimeAfter(auction.end_time);
+
+        // Mark as settled
+        const settled_auction = Auction {
+            seller: auction.seller,
+            item_id: auction.item_id,
+            start_time: auction.start_time,
+            end_time: auction.end_time,
+            min_bid: auction.min_bid,
+            highest_bid: auction.highest_bid,
+            highest_bidder: auction.highest_bidder,
+            settled: true
+        };
+
+        auctions.insert(auction_id, settled_auction);
+
+        // Return winner
+        return auction.highest_bidder;
+    }
+
+    return 0x0000000000000000000000000000000000000000000000000000000000000000;
+}
+
+// ============================================
+// Vesting Schedule
+// ============================================
+
+struct VestingSchedule {
+    beneficiary: Bytes<32>,
+    total_amount: Uint<64>,
+    start_time: Uint<64>,
+    cliff_duration: Uint<64>,
+    total_duration: Uint<64>,
+    claimed: Uint<64>
+}
+
+ledger vesting_schedules: Map<Bytes<32>, VestingSchedule>;
+
+/// Create a vesting schedule
+export circuit create_vesting(
+    schedule_id: Bytes<32>,
+    beneficiary: Bytes<32>,
+    total_amount: Uint<64>,
+    cliff_months: Uint<64>,
+    vesting_months: Uint<64>
+): [] {
+    const now = blockTime();
+
+    const schedule = VestingSchedule {
+        beneficiary: beneficiary,
+        total_amount: total_amount,
+        start_time: now,
+        cliff_duration: cliff_months * ONE_MONTH,
+        total_duration: vesting_months * ONE_MONTH,
+        claimed: 0
+    };
+
+    vesting_schedules.insert(schedule_id, schedule);
+}
+
+/// Claim vested tokens
+export circuit claim_vested(schedule_id: Bytes<32>): Uint<64> {
+    const claimer = get_owner();
+    const claimer_disclosed = disclose(claimer);
+
+    const schedule_opt = vesting_schedules.lookup(schedule_id);
+    assert schedule_opt is Maybe::Some(_), "Schedule not found";
+
+    if schedule_opt is Maybe::Some(schedule) {
+        // Verify claimer is beneficiary
+        assert schedule.beneficiary == claimer_disclosed, "Not beneficiary";
+
+        // Must be past cliff
+        const cliff_end = schedule.start_time + schedule.cliff_duration;
+        blockTimeAfter(cliff_end);
+
+        // Calculate vested amount
+        const now = blockTime();
+        const elapsed = now - schedule.start_time;
+        const vesting_end = schedule.start_time + schedule.total_duration;
+
+        var vested: Uint<64> = 0;
+
+        if now >= vesting_end {
+            // Fully vested
+            vested = schedule.total_amount;
+        } else {
+            // Partial vesting (linear)
+            vested = (schedule.total_amount * elapsed) / schedule.total_duration;
+        }
+
+        // Calculate claimable (vested minus already claimed)
+        const claimable = vested - schedule.claimed;
+        assert claimable > 0, "Nothing to claim";
+
+        // Update claimed amount
+        const updated = VestingSchedule {
+            beneficiary: schedule.beneficiary,
+            total_amount: schedule.total_amount,
+            start_time: schedule.start_time,
+            cliff_duration: schedule.cliff_duration,
+            total_duration: schedule.total_duration,
+            claimed: schedule.claimed + claimable
+        };
+
+        vesting_schedules.insert(schedule_id, updated);
+
+        return claimable;
+    }
+
+    return 0;
+}
+
+// ============================================
+// Cooldown Pattern
+// ============================================
+
+ledger last_action_time: Map<Bytes<32>, Uint<64>>;
+ledger action_count: Map<Bytes<32>, Uint<64>>;
+
+const COOLDOWN_PERIOD: Uint<64> = ONE_HOUR;
+const MAX_ACTIONS_PER_DAY: Uint<64> = 10;
+
+/// Action with cooldown between executions
+export circuit action_with_cooldown(): [] {
+    const user = get_owner();
+    const user_disclosed = disclose(user);
+
+    // Check cooldown
+    const last_time_opt = last_action_time.lookup(user_disclosed);
+
+    if last_time_opt is Maybe::Some(last_time) {
+        // Must wait for cooldown
+        blockTimeAfter(last_time + COOLDOWN_PERIOD);
+    }
+
+    // Perform action...
+
+    // Record action time
+    last_action_time.insert(user_disclosed, blockTime());
+}
+
+// ============================================
+// Time Window
+// ============================================
+
+struct TimeWindow {
+    name: Field,
+    start_time: Uint<64>,
+    end_time: Uint<64>,
+    active: Boolean
+}
+
+ledger windows: Map<Bytes<32>, TimeWindow>;
+
+/// Create a time window for an event
+export circuit create_window(
+    window_id: Bytes<32>,
+    name: Field,
+    start_delay: Uint<64>,
+    duration: Uint<64>
+): [] {
+    const now = blockTime();
+
+    const window = TimeWindow {
+        name: name,
+        start_time: now + start_delay,
+        end_time: now + start_delay + duration,
+        active: true
+    };
+
+    windows.insert(window_id, window);
+}
+
+/// Perform action only within time window
+export circuit action_in_window(window_id: Bytes<32>): [] {
+    const window_opt = windows.lookup(window_id);
+    assert window_opt is Maybe::Some(_), "Window not found";
+
+    if window_opt is Maybe::Some(window) {
+        assert window.active, "Window not active";
+
+        // Must be after window start
+        blockTimeAfter(window.start_time);
+
+        // Must be before window end
+        blockTimeBefore(window.end_time);
+
+        // Perform action...
+    }
+}
+
+// ============================================
+// Expiration Checking
+// ============================================
+
+struct Subscription {
+    user: Bytes<32>,
+    tier: Field,
+    expires_at: Uint<64>
+}
+
+ledger subscriptions: Map<Bytes<32>, Subscription>;
+
+/// Check if subscription is active (without failing)
+export circuit is_subscription_active(user: Bytes<32>): Boolean {
+    const sub_opt = subscriptions.lookup(user);
+
+    if sub_opt is Maybe::Some(sub) {
+        // Compare current time to expiration
+        return blockTime() < sub.expires_at;
+    }
+
+    return false;
+}
+
+/// Require active subscription (fails if expired)
+export circuit require_subscription(user: Bytes<32>): [] {
+    const sub_opt = subscriptions.lookup(user);
+    assert sub_opt is Maybe::Some(_), "No subscription";
+
+    if sub_opt is Maybe::Some(sub) {
+        // This will FAIL if subscription expired
+        blockTimeBefore(sub.expires_at);
+    }
+}
+
+/// Extend subscription
+export circuit extend_subscription(user: Bytes<32>, additional_days: Uint<64>): Uint<64> {
+    const sub_opt = subscriptions.lookup(user);
+
+    var new_expiry: Uint<64> = 0;
+
+    if sub_opt is Maybe::Some(sub) {
+        // If not expired, extend from current expiry
+        // If expired, extend from now
+        const base_time = if blockTime() < sub.expires_at {
+            sub.expires_at
+        } else {
+            blockTime()
+        };
+
+        new_expiry = base_time + (additional_days * ONE_DAY);
+
+        const updated = Subscription {
+            user: sub.user,
+            tier: sub.tier,
+            expires_at: new_expiry
+        };
+
+        subscriptions.insert(user, updated);
+    } else {
+        // New subscription
+        new_expiry = blockTime() + (additional_days * ONE_DAY);
+
+        const new_sub = Subscription {
+            user: user,
+            tier: 1,  // Default tier
+            expires_at: new_expiry
+        };
+
+        subscriptions.insert(user, new_sub);
+    }
+
+    return new_expiry;
+}
+
+// ============================================
+// Timestamp Recording
+// ============================================
+
+struct AuditEntry {
+    action: Field,
+    actor: Bytes<32>,
+    timestamp: Uint<64>,
+    data: Bytes<32>
+}
+
+ledger audit_log: List<AuditEntry>;
+
+/// Log an action with timestamp
+export circuit log_action(action: Field, data: Bytes<32>): Uint<64> {
+    const actor = get_owner();
+
+    const entry = AuditEntry {
+        action: action,
+        actor: disclose(actor),
+        timestamp: blockTime(),  // Capture current time
+        data: data
+    };
+
+    audit_log.append(entry);
+
+    return blockTime();
+}

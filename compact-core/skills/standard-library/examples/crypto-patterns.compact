@@ -1,0 +1,249 @@
+// crypto-patterns.compact - Cryptographic function usage examples
+// Demonstrates hash, commit, and EC operations from CompactStandardLibrary
+
+import {
+    persistentHash,
+    transientHash,
+    persistentCommit,
+    transientCommit,
+    ecAdd,
+    ecMul,
+    Maybe
+} from "CompactStandardLibrary";
+
+// ============================================
+// Commitment Patterns
+// ============================================
+
+// Store commitments on-chain
+ledger commitments: Map<Bytes<32>, Bytes<32>>;
+ledger revealed: Map<Bytes<32>, Field>;
+
+witness get_user_id(): Bytes<32>;
+witness get_secret_value(): Field;
+
+/// Create a hiding commitment to a secret value
+/// The commitment hides the value using a random nonce
+export circuit create_commitment(): Bytes<32> {
+    const user = get_user_id();
+    const value = get_secret_value();
+
+    // persistentCommit is SAFE: includes nonce to hide value
+    const commitment = persistentCommit(value);
+
+    // Store commitment on-chain
+    commitments.insert(disclose(user), commitment);
+
+    return commitment;
+}
+
+/// Verify and reveal a previously committed value
+export circuit reveal_commitment(): Field {
+    const user = get_user_id();
+    const value = get_secret_value();
+
+    const user_disclosed = disclose(user);
+
+    // Verify commitment exists
+    const stored_opt = commitments.lookup(user_disclosed);
+    assert stored_opt is Maybe::Some(_), "No commitment found";
+
+    // Verify the value matches the commitment
+    const computed = persistentCommit(value);
+
+    if stored_opt is Maybe::Some(stored) {
+        assert stored == computed, "Value does not match commitment";
+    }
+
+    // Reveal the value (requires explicit disclosure)
+    const revealed_value = disclose(value);
+    revealed.insert(user_disclosed, revealed_value);
+
+    return revealed_value;
+}
+
+// ============================================
+// Nullifier Pattern
+// ============================================
+
+ledger used_nullifiers: Set<Bytes<32>>;
+ledger deposit_commitments: Set<Bytes<32>>;
+
+witness get_deposit_secret(): Field;
+
+/// Deposit with commitment (Phase 1)
+export circuit deposit(): Bytes<32> {
+    const secret = get_deposit_secret();
+
+    // Create commitment to deposit
+    const commitment = persistentCommit(secret);
+
+    // Store commitment
+    deposit_commitments.insert(commitment);
+
+    return commitment;
+}
+
+/// Withdraw using nullifier (Phase 2)
+/// Proves knowledge of secret without revealing it
+export circuit withdraw(): [] {
+    const secret = get_deposit_secret();
+
+    // Verify deposit commitment exists
+    const commitment = persistentCommit(secret);
+    assert deposit_commitments.member(commitment), "Invalid deposit";
+
+    // Generate deterministic nullifier
+    // persistentHash is UNSAFE (no nonce) but intentional here:
+    // we WANT the same secret to produce the same nullifier
+    const nullifier = persistentHash("withdrawal-nullifier", secret);
+
+    // Prevent double-spend
+    assert !used_nullifiers.member(nullifier), "Already withdrawn";
+    used_nullifiers.insert(nullifier);
+
+    // Perform withdrawal...
+}
+
+// ============================================
+// Transient vs Persistent
+// ============================================
+
+/// Demonstrate transient commit for intra-transaction verification
+export circuit transient_verification(value: Field): Boolean {
+    // Transient commit: only valid within this transaction
+    // Lower cost than persistent
+    const commit1 = transientCommit(value);
+    const commit2 = transientCommit(value);
+
+    // Same value produces same commitment within transaction
+    return commit1 == commit2;
+}
+
+/// Demonstrate transient hash for temporary identifiers
+export circuit generate_temp_id(data: Bytes<32>): Bytes<32> {
+    // Transient hash: deterministic within transaction
+    // Use for temporary IDs that don't need cross-tx stability
+    return transientHash("temp-id", data);
+}
+
+// ============================================
+// Domain Separation
+// ============================================
+
+/// Always use descriptive domain strings
+export circuit domain_separation_example(data: Field): (Bytes<32>, Bytes<32>, Bytes<32>) {
+    // Different domains produce different hashes for same input
+    const hash_a = persistentHash("voting-nullifier", data);
+    const hash_b = persistentHash("auction-bid-id", data);
+    const hash_c = persistentHash("membership-proof", data);
+
+    // These will all be different even with same input
+    return (hash_a, hash_b, hash_c);
+}
+
+// ============================================
+// Low-Entropy Protection
+// ============================================
+
+witness get_user_salt(): Field;
+
+/// Protect low-entropy values with user-specific salt
+export circuit protected_vote(vote_choice: Field): Bytes<32> {
+    // WRONG: vote_choice has low entropy (e.g., 0, 1, 2)
+    // const hash = persistentHash("vote", vote_choice);  // Brute-forceable!
+
+    // CORRECT: Include user-specific salt
+    const salt = get_user_salt();
+    const hash = persistentHash("vote", (salt, vote_choice));
+
+    return hash;
+}
+
+// ============================================
+// Elliptic Curve Operations
+// ============================================
+
+// Note: Point type and generator G are curve-specific
+// This is a conceptual example
+
+struct Point {
+    x: Field,
+    y: Field
+}
+
+// Generator point (would be defined by the curve)
+const G: Point = Point { x: 1, y: 2 };  // Placeholder
+
+witness get_private_key(): Field;
+
+/// Derive public key from private key
+export circuit derive_public_key(): Point {
+    const sk = get_private_key();
+
+    // public_key = sk * G (scalar multiplication)
+    return ecMul(sk, G);
+}
+
+/// Add two public keys (useful for multisig)
+export circuit combine_public_keys(pk1: Point, pk2: Point): Point {
+    // combined = pk1 + pk2 (point addition)
+    return ecAdd(pk1, pk2);
+}
+
+/// Verify a simple Schnorr-style signature component
+export circuit verify_signature_component(
+    public_key: Point,
+    challenge: Field,
+    response: Field
+): Boolean {
+    // R = response * G - challenge * public_key
+    // This is a simplified verification step
+
+    const response_point = ecMul(response, G);
+    const challenge_pk = ecMul(challenge, public_key);
+
+    // In practice, you'd also need point negation and comparison
+    // This is a conceptual demonstration
+    return true;
+}
+
+// ============================================
+// Combined Pattern: Anonymous Credentials
+// ============================================
+
+ledger credential_commitments: Set<Bytes<32>>;
+ledger revoked_credentials: Set<Bytes<32>>;
+
+witness get_credential_secret(): Field;
+witness get_credential_attributes(): Bytes<32>;
+
+/// Issue a credential (commit to secret + attributes)
+export circuit issue_credential(): Bytes<32> {
+    const secret = get_credential_secret();
+    const attributes = get_credential_attributes();
+
+    // Commit to (secret, attributes) pair
+    const commitment = persistentCommit((secret, disclose(attributes)));
+
+    credential_commitments.insert(commitment);
+
+    return commitment;
+}
+
+/// Prove credential ownership without revealing which credential
+export circuit prove_credential(): Bytes<32> {
+    const secret = get_credential_secret();
+    const attributes = get_credential_attributes();
+
+    // Verify credential exists
+    const commitment = persistentCommit((secret, disclose(attributes)));
+    assert credential_commitments.member(commitment), "Invalid credential";
+
+    // Check not revoked using nullifier
+    const nullifier = persistentHash("credential-use", secret);
+    assert !revoked_credentials.member(nullifier), "Credential revoked";
+
+    // Return proof token (deterministic for this credential)
+    return nullifier;
+}

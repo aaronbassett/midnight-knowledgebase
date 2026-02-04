@@ -1,0 +1,345 @@
+// token-contract.compact - Token operations example
+// Demonstrates mintToken, send, receive, mergeCoin, and CoinInfo
+
+import {
+    mintToken,
+    send,
+    receive,
+    mergeCoin,
+    CoinInfo,
+    Maybe
+} from "CompactStandardLibrary";
+
+// ============================================
+// Token Configuration
+// ============================================
+
+// Token type identifier (derived from contract address in production)
+const TOKEN_DOMAIN: Bytes<32> = 0x0000000000000000000000000000000000000000000000000000000000000001;
+
+// Token metadata
+const TOKEN_NAME: Field = 1;  // "MyToken" encoded
+const TOKEN_DECIMALS: Uint<8> = 18;
+
+// ============================================
+// Ledger State
+// ============================================
+
+ledger admin: Cell<Bytes<32>>;
+ledger total_supply: Counter;
+ledger max_supply: Cell<Uint<64>>;
+ledger paused: Cell<Boolean>;
+
+// User balances (logical tracking alongside UTXO)
+ledger balances: Map<Bytes<32>, Uint<64>>;
+
+// Treasury for fees and rewards
+ledger treasury_balance: Counter;
+
+// ============================================
+// Witnesses
+// ============================================
+
+witness get_caller(): Bytes<32>;
+witness get_recipient(): Bytes<32>;
+
+// ============================================
+// Admin Functions
+// ============================================
+
+/// Initialize the token contract
+export circuit initialize(admin_address: Bytes<32>, cap: Uint<64>): [] {
+    admin.write(admin_address);
+    max_supply.write(cap);
+    paused.write(false);
+}
+
+/// Pause all transfers
+export circuit pause(): [] {
+    const caller = get_caller();
+    assert disclose(caller) == admin.read(), "Only admin";
+    paused.write(true);
+}
+
+/// Unpause transfers
+export circuit unpause(): [] {
+    const caller = get_caller();
+    assert disclose(caller) == admin.read(), "Only admin";
+    paused.write(false);
+}
+
+// ============================================
+// Minting
+// ============================================
+
+/// Mint new tokens to a recipient
+export circuit mint(amount: Uint<64>, recipient: Bytes<32>): [] {
+    // Admin check
+    const caller = get_caller();
+    assert disclose(caller) == admin.read(), "Only admin can mint";
+
+    // Supply cap check
+    const new_total = total_supply.value() + amount;
+    assert new_total <= max_supply.read(), "Exceeds max supply";
+
+    // Create coin info
+    const info = CoinInfo {
+        value: amount,
+        token_type: TOKEN_DOMAIN,
+        owner: recipient
+    };
+
+    // Mint the token
+    mintToken(info);
+
+    // Update supply tracking
+    total_supply.increment(amount);
+
+    // Update balance tracking
+    const current = balances.lookup(recipient);
+    const new_balance = if current is Maybe::Some(b) { b + amount } else { amount };
+    balances.insert(recipient, new_balance);
+}
+
+/// Batch mint to multiple recipients
+export circuit batch_mint(
+    amounts: Vector<Uint<64>, 10>,
+    recipients: Vector<Bytes<32>, 10>,
+    count: Uint<8>
+): [] {
+    const caller = get_caller();
+    assert disclose(caller) == admin.read(), "Only admin can mint";
+
+    for i in 0..10 {
+        if i < count as Uint<64> {
+            const amount = amounts[i];
+            const recipient = recipients[i];
+
+            // Check supply
+            const new_total = total_supply.value() + amount;
+            assert new_total <= max_supply.read(), "Exceeds max supply";
+
+            const info = CoinInfo {
+                value: amount,
+                token_type: TOKEN_DOMAIN,
+                owner: recipient
+            };
+
+            mintToken(info);
+            total_supply.increment(amount);
+
+            // Update balance
+            const current = balances.lookup(recipient);
+            const new_balance = if current is Maybe::Some(b) { b + amount } else { amount };
+            balances.insert(recipient, new_balance);
+        }
+    }
+}
+
+// ============================================
+// Receiving Tokens
+// ============================================
+
+/// Deposit tokens into the contract
+export circuit deposit(): Uint<64> {
+    assert !paused.read(), "Contract is paused";
+
+    const depositor = get_caller();
+    const depositor_disclosed = disclose(depositor);
+
+    // Receive coins sent to this circuit
+    const coins = receive();
+
+    var total_deposited: Uint<64> = 0;
+
+    // Process each received coin
+    for i in 0..coins.length() {
+        const coin = coins[i];
+
+        // Only accept our token type
+        if coin.token_type == TOKEN_DOMAIN {
+            total_deposited = total_deposited + coin.value;
+        }
+    }
+
+    assert total_deposited > 0, "No valid tokens received";
+
+    // Update treasury balance
+    treasury_balance.increment(total_deposited);
+
+    return total_deposited;
+}
+
+/// Deposit and merge multiple coins
+export circuit deposit_and_merge(): Uint<64> {
+    assert !paused.read(), "Contract is paused";
+
+    // Receive all coins
+    const coins = receive();
+
+    // Merge into single coin (all must be same type)
+    const merged = mergeCoin(coins);
+
+    assert merged.token_type == TOKEN_DOMAIN, "Invalid token type";
+
+    treasury_balance.increment(merged.value);
+
+    return merged.value;
+}
+
+// ============================================
+// Sending Tokens
+// ============================================
+
+/// Withdraw tokens from the contract to recipient
+export circuit withdraw(amount: Uint<64>): [] {
+    assert !paused.read(), "Contract is paused";
+
+    const recipient = get_recipient();
+    const recipient_disclosed = disclose(recipient);
+
+    // Check treasury has sufficient balance
+    assert treasury_balance.value() >= amount, "Insufficient treasury balance";
+
+    // Create coin for recipient
+    const info = CoinInfo {
+        value: amount,
+        token_type: TOKEN_DOMAIN,
+        owner: recipient_disclosed
+    };
+
+    const coin = mintToken(info);
+    send(coin, recipient_disclosed);
+
+    // Update treasury (would need proper decrement in real impl)
+    // Note: Counter only increments, so tracking would need adjustment
+}
+
+/// Transfer tokens between users
+export circuit transfer(to: Bytes<32>, amount: Uint<64>): [] {
+    assert !paused.read(), "Contract is paused";
+
+    const from = get_caller();
+    const from_disclosed = disclose(from);
+
+    // Check sender balance
+    const from_balance_opt = balances.lookup(from_disclosed);
+    assert from_balance_opt is Maybe::Some(_), "No balance";
+
+    if from_balance_opt is Maybe::Some(from_balance) {
+        assert from_balance >= amount, "Insufficient balance";
+
+        // Update sender balance
+        balances.insert(from_disclosed, from_balance - amount);
+
+        // Update recipient balance
+        const to_balance_opt = balances.lookup(to);
+        const new_to_balance = if to_balance_opt is Maybe::Some(b) { b + amount } else { amount };
+        balances.insert(to, new_to_balance);
+
+        // Create and send actual token
+        const info = CoinInfo {
+            value: amount,
+            token_type: TOKEN_DOMAIN,
+            owner: to
+        };
+
+        const coin = mintToken(info);
+        send(coin, to);
+    }
+}
+
+// ============================================
+// Utility Functions
+// ============================================
+
+/// Get balance of an address
+export circuit get_balance(address: Bytes<32>): Uint<64> {
+    const balance_opt = balances.lookup(address);
+    return if balance_opt is Maybe::Some(b) { b } else { 0 };
+}
+
+/// Get total supply
+export circuit get_total_supply(): Uint<64> {
+    return total_supply.value();
+}
+
+/// Get remaining mintable supply
+export circuit get_remaining_supply(): Uint<64> {
+    const max = max_supply.read();
+    const current = total_supply.value();
+
+    if current >= max {
+        return 0;
+    }
+
+    return max - current;
+}
+
+/// Check if contract is paused
+export circuit is_paused(): Boolean {
+    return paused.read();
+}
+
+// ============================================
+// Advanced Patterns
+// ============================================
+
+/// Receive and immediately redistribute
+export circuit receive_and_split(
+    recipients: Vector<Bytes<32>, 5>,
+    shares: Vector<Uint<64>, 5>
+): [] {
+    // Receive coins
+    const coins = receive();
+    const merged = mergeCoin(coins);
+
+    // Calculate total shares
+    var total_shares: Uint<64> = 0;
+    for i in 0..5 {
+        total_shares = total_shares + shares[i];
+    }
+
+    // Distribute proportionally
+    for i in 0..5 {
+        if shares[i] > 0 {
+            const recipient_amount = (merged.value * shares[i]) / total_shares;
+
+            const info = CoinInfo {
+                value: recipient_amount,
+                token_type: TOKEN_DOMAIN,
+                owner: recipients[i]
+            };
+
+            const coin = mintToken(info);
+            send(coin, recipients[i]);
+        }
+    }
+}
+
+/// Swap tokens for different type (conceptual)
+export circuit swap(output_type: Bytes<32>, min_output: Uint<64>): Uint<64> {
+    // Receive input tokens
+    const coins = receive();
+    const merged = mergeCoin(coins);
+
+    assert merged.token_type == TOKEN_DOMAIN, "Wrong input token";
+
+    // Calculate output (simplified exchange rate)
+    const exchange_rate: Uint<64> = 100;  // 1:100
+    const output_amount = merged.value * exchange_rate;
+
+    assert output_amount >= min_output, "Slippage exceeded";
+
+    // Mint output tokens
+    const recipient = get_recipient();
+    const info = CoinInfo {
+        value: output_amount,
+        token_type: output_type,
+        owner: disclose(recipient)
+    };
+
+    mintToken(info);
+
+    return output_amount;
+}
