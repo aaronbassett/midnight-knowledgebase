@@ -1,0 +1,252 @@
+// merkle-membership.compact - MerkleTree membership proof patterns
+// Demonstrates MerkleTree operations and membership verification
+
+import { persistentCommit, persistentHash, merkleTreePathRoot, Maybe } from "CompactStandardLibrary";
+
+// ============================================
+// Basic Merkle Tree
+// ============================================
+
+ledger members: MerkleTree<Bytes<32>>;
+ledger member_count: Counter;
+
+/// Add a new member to the tree
+export circuit add_member(commitment: Bytes<32>): [] {
+    assert !members.isFull(), "Tree is full";
+    members.insert(commitment);
+    member_count.increment(1);
+}
+
+/// Get current membership root
+export circuit get_root(): Bytes<32> {
+    return members.root();
+}
+
+/// Get member count
+export circuit get_member_count(): Uint<64> {
+    return member_count.value();
+}
+
+// ============================================
+// Membership Proof Verification
+// ============================================
+
+witness get_member_secret(): Bytes<32>;
+witness get_merkle_path(index: Uint<32>): Vector<Bytes<32>, 20>;
+
+/// Prove membership without revealing identity
+export circuit prove_membership(
+    expected_root: Bytes<32>,
+    leaf_index: Uint<32>
+): Boolean {
+    // Get secret from witness
+    const secret = get_member_secret();
+
+    // Compute commitment (same as when registered)
+    const commitment = persistentCommit(secret);
+
+    // Get Merkle proof path
+    const path = get_merkle_path(leaf_index);
+
+    // Compute root from leaf and path
+    const computed_root = merkleTreePathRoot(commitment, path);
+
+    // Verify against expected root
+    return computed_root == expected_root;
+}
+
+/// Prove membership against current tree root
+export circuit prove_current_membership(leaf_index: Uint<32>): Boolean {
+    const secret = get_member_secret();
+    const commitment = persistentCommit(secret);
+    const path = get_merkle_path(leaf_index);
+
+    const computed_root = merkleTreePathRoot(commitment, path);
+    const current_root = members.root();
+
+    return computed_root == current_root;
+}
+
+// ============================================
+// Registration with Commitment
+// ============================================
+
+witness get_registration_secret(): Bytes<32>;
+
+/// Register a new member with a secret
+/// Returns the commitment for the member's records
+export circuit register_with_secret(): Bytes<32> {
+    assert !members.isFull(), "Membership tree is full";
+
+    const secret = get_registration_secret();
+
+    // Create commitment from secret
+    const commitment = persistentCommit(secret);
+
+    // Add to tree
+    members.insert(commitment);
+    member_count.increment(1);
+
+    // Return commitment (member needs this to prove membership later)
+    return commitment;
+}
+
+// ============================================
+// Nullifier-Based Membership (One-Time Use)
+// ============================================
+
+ledger used_nullifiers: Set<Bytes<32>>;
+
+/// Prove membership and consume it (one-time use)
+/// Returns a nullifier that prevents reuse
+export circuit use_membership(
+    expected_root: Bytes<32>,
+    leaf_index: Uint<32>
+): Bytes<32> {
+    // Prove membership
+    const secret = get_member_secret();
+    const commitment = persistentCommit(secret);
+    const path = get_merkle_path(leaf_index);
+
+    const computed_root = merkleTreePathRoot(commitment, path);
+    assert computed_root == expected_root, "Invalid membership proof";
+
+    // Compute nullifier
+    const nullifier = persistentHash(secret, "membership_nullifier");
+
+    // Check and record nullifier
+    assert !used_nullifiers.member(nullifier), "Membership already used";
+    used_nullifiers.insert(nullifier);
+
+    return nullifier;
+}
+
+/// Check if a nullifier has been used
+export circuit is_nullifier_used(nullifier: Bytes<32>): Boolean {
+    return used_nullifiers.member(nullifier);
+}
+
+// ============================================
+// Historic Merkle Tree
+// ============================================
+
+ledger historic_members: HistoricMerkleTree<Bytes<32>>;
+
+/// Add member to historic tree
+export circuit add_historic_member(commitment: Bytes<32>): [] {
+    historic_members.insert(commitment);
+}
+
+/// Prove membership against a historical root
+/// Useful when proof was generated before tree updates
+export circuit prove_historic_membership(
+    historical_root: Bytes<32>,
+    leaf_index: Uint<32>
+): Boolean {
+    const secret = get_member_secret();
+    const commitment = persistentCommit(secret);
+    const path = get_merkle_path(leaf_index);
+
+    const computed_root = merkleTreePathRoot(commitment, path);
+
+    // HistoricMerkleTree validates that historical_root was a valid past root
+    return computed_root == historical_root;
+}
+
+/// Reset history to save storage (admin operation)
+export circuit reset_tree_history(): [] {
+    historic_members.resetHistory();
+}
+
+// ============================================
+// Multi-Tree Membership
+// ============================================
+
+ledger tier1_members: MerkleTree<Bytes<32>>;
+ledger tier2_members: MerkleTree<Bytes<32>>;
+ledger tier3_members: MerkleTree<Bytes<32>>;
+
+enum MembershipTier {
+    Tier1,
+    Tier2,
+    Tier3
+}
+
+/// Check membership in any tier and return the tier
+export circuit check_any_membership(
+    tier1_root: Bytes<32>,
+    tier2_root: Bytes<32>,
+    tier3_root: Bytes<32>,
+    leaf_index: Uint<32>
+): MembershipTier {
+    const secret = get_member_secret();
+    const commitment = persistentCommit(secret);
+    const path = get_merkle_path(leaf_index);
+
+    const computed_root = merkleTreePathRoot(commitment, path);
+
+    if computed_root == tier1_root {
+        return MembershipTier::Tier1;
+    }
+
+    if computed_root == tier2_root {
+        return MembershipTier::Tier2;
+    }
+
+    if computed_root == tier3_root {
+        return MembershipTier::Tier3;
+    }
+
+    assert false, "Not a member of any tier";
+
+    // Unreachable
+    return MembershipTier::Tier1;
+}
+
+// ============================================
+// Membership with Metadata
+// ============================================
+
+struct MemberData {
+    commitment: Bytes<32>,
+    joined_at: Uint<64>,
+    tier: Uint<8>
+}
+
+ledger member_data: Map<Bytes<32>, MemberData>;
+ledger membership_tree: MerkleTree<Bytes<32>>;
+
+/// Register with metadata
+export circuit register_with_metadata(
+    commitment: Bytes<32>,
+    timestamp: Uint<64>,
+    tier: Uint<8>
+): [] {
+    // Add to tree
+    membership_tree.insert(commitment);
+
+    // Store metadata
+    const data = MemberData {
+        commitment: commitment,
+        joined_at: timestamp,
+        tier: tier
+    };
+    member_data.insert(commitment, data);
+}
+
+/// Get member metadata (if known commitment)
+export circuit get_member_data(commitment: Bytes<32>): MemberData {
+    const data_opt = member_data.lookup(commitment);
+    assert data_opt is Maybe::Some(_), "Member data not found";
+
+    if data_opt is Maybe::Some(data) {
+        return data;
+    }
+
+    // Unreachable
+    return MemberData {
+        commitment: commitment,
+        joined_at: 0,
+        tier: 0
+    };
+}

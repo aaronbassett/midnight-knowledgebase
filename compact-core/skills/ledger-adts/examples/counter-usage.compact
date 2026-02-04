@@ -1,0 +1,197 @@
+// counter-usage.compact - Counter ADT usage patterns
+// Demonstrates Counter operations and common patterns
+
+// ============================================
+// Basic Counter Usage
+// ============================================
+
+ledger simple_counter: Counter;
+
+export circuit increment_by_one(): Uint<64> {
+    simple_counter.increment(1);
+    return simple_counter.value();
+}
+
+export circuit increment_by_amount(amount: Uint<64>): Uint<64> {
+    simple_counter.increment(amount);
+    return simple_counter.value();
+}
+
+export circuit get_count(): Uint<64> {
+    return simple_counter.value();
+}
+
+// ============================================
+// Sequential ID Generator
+// ============================================
+
+struct Item {
+    id: Uint<64>,
+    data: Bytes<32>,
+    creator: Bytes<32>
+}
+
+ledger id_generator: Counter;
+ledger items: Map<Uint<64>, Item>;
+
+export circuit create_item(data: Bytes<32>, creator: Bytes<32>): Uint<64> {
+    // Get next available ID
+    const new_id = id_generator.value();
+
+    // Create item with sequential ID
+    const item = Item {
+        id: new_id,
+        data: data,
+        creator: creator
+    };
+
+    // Store item
+    items.insert(new_id, item);
+
+    // Increment for next item
+    id_generator.increment(1);
+
+    return new_id;
+}
+
+export circuit get_next_id(): Uint<64> {
+    return id_generator.value();
+}
+
+// ============================================
+// Statistics Tracking
+// ============================================
+
+ledger total_deposits: Counter;
+ledger total_withdrawals: Counter;
+ledger transaction_count: Counter;
+ledger error_count: Counter;
+
+export circuit record_deposit(amount: Uint<64>): [] {
+    total_deposits.increment(amount);
+    transaction_count.increment(1);
+}
+
+export circuit record_withdrawal(amount: Uint<64>): [] {
+    total_withdrawals.increment(amount);
+    transaction_count.increment(1);
+}
+
+export circuit record_error(): [] {
+    error_count.increment(1);
+}
+
+export circuit get_stats(): (Uint<64>, Uint<64>, Uint<64>, Uint<64>) {
+    return (
+        total_deposits.value(),
+        total_withdrawals.value(),
+        transaction_count.value(),
+        error_count.value()
+    );
+}
+
+// ============================================
+// Rate Limiting by Count
+// ============================================
+
+ledger daily_action_count: Counter;
+
+const MAX_DAILY_ACTIONS: Uint<64> = 1000;
+
+export circuit rate_limited_action(): Boolean {
+    // Check if under limit
+    if daily_action_count.value() >= MAX_DAILY_ACTIONS {
+        return false;  // Rate limit exceeded
+    }
+
+    // Perform action (simulated)
+    // ...
+
+    // Record action
+    daily_action_count.increment(1);
+
+    return true;
+}
+
+export circuit get_remaining_actions(): Uint<64> {
+    const used = daily_action_count.value();
+    if used >= MAX_DAILY_ACTIONS {
+        return 0;
+    }
+    return MAX_DAILY_ACTIONS - used;
+}
+
+// ============================================
+// Version Tracking
+// ============================================
+
+struct Config {
+    value: Field,
+    updated_at: Uint<64>
+}
+
+ledger config_version: Counter;
+ledger config: Cell<Config>;
+
+export circuit update_config(new_value: Field, timestamp: Uint<64>): Uint<64> {
+    // Update config
+    const new_config = Config {
+        value: new_value,
+        updated_at: timestamp
+    };
+    config.write(new_config);
+
+    // Increment version
+    config_version.increment(1);
+
+    return config_version.value();
+}
+
+export circuit get_config_version(): Uint<64> {
+    return config_version.value();
+}
+
+// ============================================
+// Round/Epoch Management
+// ============================================
+
+ledger round_counter: Counter;
+
+export circuit advance_round(): Uint<64> {
+    round_counter.increment(1);
+    return round_counter.value();
+}
+
+export circuit get_current_round(): Uint<64> {
+    return round_counter.value();
+}
+
+// Check if we're in a specific round range
+export circuit is_in_round_range(min_round: Uint<64>, max_round: Uint<64>): Boolean {
+    const current = round_counter.value();
+    return current >= min_round && current <= max_round;
+}
+
+// ============================================
+// Multiple Independent Counters
+// ============================================
+
+ledger user_action_counts: Map<Bytes<32>, Uint<64>>;
+ledger global_action_count: Counter;
+
+export circuit track_user_action(user: Bytes<32>): (Uint<64>, Uint<64>) {
+    // Increment global counter
+    global_action_count.increment(1);
+
+    // Get and increment user's count (using Map since Counter doesn't support per-user)
+    const current_user_count = user_action_counts.lookup(user);
+    const new_count = if current_user_count is Maybe::Some(count) {
+        count + 1
+    } else {
+        1
+    };
+
+    user_action_counts.insert(user, new_count);
+
+    return (new_count, global_action_count.value());
+}
