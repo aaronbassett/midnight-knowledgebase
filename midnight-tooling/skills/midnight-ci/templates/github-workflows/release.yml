@@ -1,0 +1,129 @@
+# Midnight Release Workflow
+# Creates releases with compiled contract artifacts
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  NODE_VERSION: '20'
+  COMPACT_VERSION: '0.26.0'
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Compact
+        uses: actions/cache@v4
+        with:
+          path: ~/.compact
+          key: compact-${{ runner.os }}-${{ env.COMPACT_VERSION }}
+
+      - name: Install Compact
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.compact/bin" >> $GITHUB_PATH
+          compact update ${{ env.COMPACT_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        run: |
+          for contract in contracts/*.compact; do
+            if [ -f "$contract" ]; then
+              name=$(basename "$contract" .compact)
+              compact compile "$contract" "build/$name/"
+            fi
+          done
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Create version info
+        run: |
+          cat > build/VERSION.json << EOF
+          {
+            "version": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "compactVersion": "${{ env.COMPACT_VERSION }}",
+            "compilerVersion": "$(compact compile --version)",
+            "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Package artifacts
+        run: |
+          cd build
+          tar -czvf ../release-${{ github.ref_name }}.tar.gz .
+          cd ..
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            CHANGES=$(git log --pretty=format:"- %s" $LAST_TAG..HEAD)
+          else
+            CHANGES=$(git log --pretty=format:"- %s" HEAD~10..HEAD)
+          fi
+          echo "changes<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-${{ github.ref_name }}.tar.gz
+          body: |
+            ## Release ${{ github.ref_name }}
+
+            ### Build Information
+            - Compact Compiler: ${{ env.COMPACT_VERSION }}
+            - Node.js: ${{ env.NODE_VERSION }}
+            - Commit: ${{ github.sha }}
+
+            ### Changes
+            ${{ steps.changelog.outputs.changes }}
+
+            ### Installation
+            ```bash
+            # Download and extract
+            curl -LO https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/release-${{ github.ref_name }}.tar.gz
+            tar -xzf release-${{ github.ref_name }}.tar.gz -C ./build
+            ```
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            build/
+            release-${{ github.ref_name }}.tar.gz
+          retention-days: 30

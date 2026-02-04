@@ -1,0 +1,20 @@
+{
+  "name": "midnight-tooling",
+  "version": "0.1.0",
+  "description": "Developer tooling for Midnight Network - environment setup, debugging, version management, and CI/CD workflows",
+  "author": {
+    "name": "Midnight",
+    "url": "https://midnight.network"
+  },
+  "homepage": "https://docs.midnight.network",
+  "repository": "https://github.com/midnightntwrk/midnight-tooling",
+  "license": "Apache-2.0",
+  "keywords": [
+    "midnight",
+    "blockchain",
+    "zero-knowledge",
+    "compact",
+    "smart-contracts",
+    "developer-tools"
+  ]
+}

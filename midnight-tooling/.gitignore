@@ -1,0 +1,16 @@
+# Local settings
+.claude/*.local.md
+
+# Cache (user-specific, not part of plugin)
+# Note: The release notes cache is stored in ~/.cache/midnight-tooling/, not in the plugin
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
