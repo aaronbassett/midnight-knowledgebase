@@ -1,0 +1,57 @@
+// types.compact - Shared type definitions
+// Included by other files in this module
+
+// ============================================
+// User-related types
+// ============================================
+
+export struct User {
+    id: Bytes<32>,
+    name_hash: Bytes<32>,
+    balance: Uint<64>,
+    status: UserStatus
+}
+
+export enum UserStatus {
+    Active,
+    Suspended,
+    Closed
+}
+
+// ============================================
+// Transaction-related types
+// ============================================
+
+export struct Transfer {
+    from: Bytes<32>,
+    to: Bytes<32>,
+    amount: Uint<64>,
+    timestamp: Uint<64>
+}
+
+export enum TransferStatus {
+    Pending,
+    Completed,
+    Failed
+}
+
+// ============================================
+// Result types for error handling
+// ============================================
+
+export enum TransferResult {
+    Success,
+    InsufficientBalance,
+    UserNotFound,
+    InvalidAmount
+}
+
+// ============================================
+// Configuration types
+// ============================================
+
+export struct Config {
+    min_transfer: Uint<64>,
+    max_transfer: Uint<64>,
+    fee_rate: Uint<64>
+}

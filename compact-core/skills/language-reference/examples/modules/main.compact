@@ -1,0 +1,91 @@
+// main.compact - Multi-file module example
+// Entry point that imports from other files
+
+include "types.compact";
+include "utils.compact";
+import { persistentHash, Maybe } from "CompactStandardLibrary";
+
+// ============================================
+// Ledger declarations using imported types
+// ============================================
+
+ledger users: Map<Bytes<32>, User>;
+ledger total_transfers: Counter;
+
+// ============================================
+// Main contract circuits
+// ============================================
+
+witness get_caller_id(): Bytes<32>;
+
+export circuit register_user(name_hash: Bytes<32>): [] {
+    const caller = get_caller_id();
+    const caller_disclosed = disclose(caller);
+
+    // Check if user already exists
+    const existing = users.lookup(caller_disclosed);
+    assert existing is Maybe::None, "User already registered";
+
+    // Create new user with imported User type
+    const new_user = User {
+        id: caller_disclosed,
+        name_hash: name_hash,
+        balance: 0,
+        status: UserStatus::Active
+    };
+
+    users.insert(caller_disclosed, new_user);
+}
+
+export circuit transfer(to: Bytes<32>, amount: Uint<64>): [] {
+    const from = get_caller_id();
+    const from_disclosed = disclose(from);
+
+    // Validate using imported utility
+    assert is_valid_amount(amount), "Invalid amount";
+
+    // Get sender
+    const sender_opt = users.lookup(from_disclosed);
+    assert sender_opt is Maybe::Some(_), "Sender not found";
+
+    if sender_opt is Maybe::Some(sender) {
+        assert sender.balance >= amount, "Insufficient balance";
+
+        // Update sender balance
+        const updated_sender = User {
+            id: sender.id,
+            name_hash: sender.name_hash,
+            balance: sender.balance - amount,
+            status: sender.status
+        };
+        users.insert(from_disclosed, updated_sender);
+    }
+
+    // Get or create recipient
+    const recipient_opt = users.lookup(to);
+    if recipient_opt is Maybe::Some(recipient) {
+        const updated_recipient = User {
+            id: recipient.id,
+            name_hash: recipient.name_hash,
+            balance: recipient.balance + amount,
+            status: recipient.status
+        };
+        users.insert(to, updated_recipient);
+    }
+
+    // Track transfer count
+    total_transfers.increment(1);
+}
+
+export circuit get_balance(user_id: Bytes<32>): Uint<64> {
+    const user_opt = users.lookup(user_id);
+    return if user_opt is Maybe::Some(user) {
+        user.balance
+    } else {
+        0
+    };
+}
+
+export circuit get_transfer_count(): Uint<64> {
+    return total_transfers.value();
+}
