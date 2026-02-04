@@ -1,0 +1,70 @@
+// Shared type definitions
+// Include this file in other contracts to use these types
+
+/// Standard address type (32-byte hash)
+export type Address = Bytes<32>;
+
+/// Standard amount type for token quantities
+export type Amount = Uint<64>;
+
+/// Standard signature type (64-byte signature)
+export type Signature = Bytes<64>;
+
+/// Standard hash type (32-byte hash)
+export type Hash = Bytes<32>;
+
+/// Transaction metadata
+export struct TxMeta {
+    nonce: Uint<64>,
+    timestamp: Uint<64>,
+    sender: Address
+}
+
+/// Transfer request structure
+export struct TransferRequest {
+    from: Address,
+    to: Address,
+    amount: Amount
+}
+
+/// Token metadata
+export struct TokenInfo {
+    name_hash: Hash,
+    symbol_hash: Hash,
+    decimals: Uint<8>,
+    total_supply: Amount
+}
+
+/// User account information
+export struct Account {
+    address: Address,
+    balance: Amount,
+    nonce: Uint<64>,
+    is_frozen: Boolean
+}
+
+/// Result type for operations that may fail
+export enum Result<T> {
+    Ok(T),
+    Err(Uint<32>)
+}
+
+/// Option type for nullable values
+export enum Option<T> {
+    Some(T),
+    None
+}
+
+/// Account status
+export enum AccountStatus {
+    Active,
+    Frozen,
+    Closed
+}
+
+/// Error codes
+export const ERR_INSUFFICIENT_BALANCE: Uint<32> = 1;
+export const ERR_UNAUTHORIZED: Uint<32> = 2;
+export const ERR_INVALID_SIGNATURE: Uint<32> = 3;
+export const ERR_ACCOUNT_FROZEN: Uint<32> = 4;
+export const ERR_CONTRACT_PAUSED: Uint<32> = 5;

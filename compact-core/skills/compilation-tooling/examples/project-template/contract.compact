@@ -1,0 +1,105 @@
+// Main contract entry point
+// This example demonstrates a simple token contract
+
+include "types.compact";
+import { persistentHash } from "CompactStandardLibrary";
+
+// Ledger state - public on-chain data
+ledger owner: Bytes<32>;
+ledger total_supply: Uint<64>;
+ledger balances: Map<Bytes<32>, Uint<64>>;
+ledger is_paused: Boolean;
+
+// Witness declarations - implemented in TypeScript
+witness get_owner_key(): Bytes<32>;
+witness get_signature(message: Bytes<32>): Bytes<64>;
+
+/// Initialize the contract with an owner
+export circuit initialize(initial_owner: Bytes<32>, initial_supply: Uint<64>): [] {
+    // Set owner
+    owner = initial_owner;
+    total_supply = initial_supply;
+    is_paused = false;
+
+    // Give initial supply to owner
+    balances.insert(initial_owner, initial_supply);
+}
+
+/// Transfer tokens from sender to recipient
+export circuit transfer(
+    from_addr: Bytes<32>,
+    to_addr: Bytes<32>,
+    amount: Uint<64>
+): [] {
+    // Check not paused
+    assert !is_paused, "Contract is paused";
+
+    // Get sender balance
+    const from_balance = balances.lookup(from_addr);
+    assert from_balance >= amount, "Insufficient balance";
+
+    // Get recipient balance (default to 0)
+    const to_balance = match balances.member(to_addr) {
+        true => balances.lookup(to_addr),
+        false => 0
+    };
+
+    // Update balances
+    balances.insert(from_addr, from_balance - amount);
+    balances.insert(to_addr, to_balance + amount);
+}
+
+/// Mint new tokens (owner only)
+export circuit mint(to_addr: Bytes<32>, amount: Uint<64>): [] {
+    // Verify caller is owner using witness
+    const caller_key = get_owner_key();
+    const caller_addr = persistentHash(caller_key);
+    assert caller_addr == owner, "Only owner can mint";
+
+    // Get current balance
+    const current_balance = match balances.member(to_addr) {
+        true => balances.lookup(to_addr),
+        false => 0
+    };
+
+    // Update balance and supply
+    balances.insert(to_addr, current_balance + amount);
+    total_supply = total_supply + amount;
+}
+
+/// Burn tokens
+export circuit burn(from_addr: Bytes<32>, amount: Uint<64>): [] {
+    // Get current balance
+    const current_balance = balances.lookup(from_addr);
+    assert current_balance >= amount, "Insufficient balance to burn";
+
+    // Update balance and supply
+    balances.insert(from_addr, current_balance - amount);
+    total_supply = total_supply - amount;
+}
+
+/// Pause contract (owner only)
+export circuit pause(): [] {
+    const caller_key = get_owner_key();
+    const caller_addr = persistentHash(caller_key);
+    assert caller_addr == owner, "Only owner can pause";
+
+    is_paused = true;
+}
+
+/// Unpause contract (owner only)
+export circuit unpause(): [] {
+    const caller_key = get_owner_key();
+    const caller_addr = persistentHash(caller_key);
+    assert caller_addr == owner, "Only owner can unpause";
+
+    is_paused = false;
+}
+
+/// Get balance for an address (view circuit)
+export circuit get_balance(addr: Bytes<32>): Uint<64> {
+    return match balances.member(addr) {
+        true => balances.lookup(addr),
+        false => 0
+    };
+}
