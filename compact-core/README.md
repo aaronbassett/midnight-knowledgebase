@@ -44,11 +44,13 @@ This Claude Code plugin provides comprehensive guidance for writing privacy-pres
 
 ## Content Inventory
 
-- **Skills**: 8 skill directories
-- **Reference Documents**: 27 detailed guides
-- **Simple Patterns**: 10+ focused contract examples
+- **Skills**: 8 specialized skill directories
+- **Reference Documents**: 29 detailed guides
+- **Compact Examples**: 30 working contract examples
+- **Simple Patterns**: 10 focused contract patterns
 - **Deep-Dive Patterns**: 3 comprehensive implementations (voting, escrow, registry)
-- **TypeScript Examples**: 5+ integration examples
+- **TypeScript Examples**: 5 integration examples
+- **Build Scripts**: 3 automation scripts
 
 ## Validation
 
