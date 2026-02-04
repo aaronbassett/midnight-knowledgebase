@@ -1,0 +1,15 @@
+{
+  "name": "midnight-expert",
+  "version": "0.0.1",
+  "description": "Plugins and skills to turn AI coding assistants into Midnight Network experts",
+  "owner": {
+    "name": "Aaron Bassett",
+    "email": "aaronbassett@gmail.com"
+  },
+  "homepage": "https://github.com/aaronbassett/midnight-expert",
+  "repository": "https://github.com/aaronbassett/midnight-expert.git",
+  "license": "MIT",
+  "keywords": [
+    "midnight network"
+  ]
+}

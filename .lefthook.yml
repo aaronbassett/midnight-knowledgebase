@@ -1,0 +1,9 @@
+pre-commit:
+  commands:
+    validate:
+      run: scripts/ci/commit.sh
+
+pre-push:
+  commands:
+    validate:
+      run: scripts/ci/push.sh
