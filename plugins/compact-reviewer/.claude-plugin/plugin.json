@@ -1,6 +1,6 @@
 {
   "name": "compact-reviewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Comprehensive code review for Compact smart contracts. Analyzes security vulnerabilities, critical issues, performance, architecture, best practices, code quality, testing, and maintainability with severity-graded findings and actionable recommendations.",
   "keywords": [
     "midnight",

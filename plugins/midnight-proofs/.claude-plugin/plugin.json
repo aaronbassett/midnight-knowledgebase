@@ -1,6 +1,6 @@
 {
   "name": "midnight-proofs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Server-side ZK proof generation, verification, and optimization for Midnight Network. Offload proof computation from clients, implement proof caching, and optimize prover performance.",
   "author": {
     "name": "Midnight Knowledgebase"
