@@ -1,6 +1,6 @@
 ---
-name: error-handling
-description: Handle errors gracefully in Midnight DApps
+name: midnight-dapp:error-handling
+description: Use when implementing error handling in Midnight DApps, displaying errors to users, handling proof generation failures, managing transaction rejections, or dealing with network disconnections.
 ---
 
 # Error Handling

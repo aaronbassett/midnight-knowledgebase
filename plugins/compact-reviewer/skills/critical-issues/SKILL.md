@@ -1,6 +1,6 @@
 ---
-name: critical-issues
-description: Bug and logic error detection for Compact smart contracts including assertion issues, type mismatches, and control flow problems
+name: compact-reviewer:critical-issues
+description: Use when reviewing Compact contracts for bugs, logic errors, assertion issues, type mismatches, dead code, unreachable paths, or control flow problems.
 ---
 
 # Critical Issues Skill

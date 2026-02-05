@@ -1,16 +1,6 @@
 ---
-name: compilation-tooling
-description: Compact compiler usage, project structure, build configuration, and understanding compiled output artifacts
-triggers:
-  - compactc
-  - compile
-  - compiler
-  - COMPACT_PATH
-  - VS Code
-  - zkir
-  - prover
-  - verifier
-  - keys
+name: compact-core:compilation-tooling
+description: Use when working with the Compact compiler (compactc), configuring build settings, understanding zkir/prover/verifier output artifacts, setting up COMPACT_PATH, or integrating VS Code language server support for Midnight smart contract development.
 ---
 
 # Compilation Tooling

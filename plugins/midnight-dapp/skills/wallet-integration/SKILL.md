@@ -1,6 +1,6 @@
 ---
-name: wallet-integration
-description: Connect and manage Lace wallet for Midnight DApp development
+name: midnight-dapp:wallet-integration
+description: Use when setting up Lace wallet connection, handling multiple user accounts, switching between testnet and mainnet, troubleshooting wallet issues, or migrating from MetaMask/Web3 patterns.
 ---
 
 # Wallet Integration

@@ -1,6 +1,6 @@
 ---
-name: Midnight Architecture
-description: This skill should be used when the user asks about "transaction structure", "building blocks", "how Midnight works", "system architecture", "transaction anatomy", "binding", "commitment", "Schnorr proof", or needs to understand how Midnight's components fit together. Covers transaction structure, building blocks, and system integration.
+name: midnight-core-concepts:architecture
+description: Use when asking about Midnight transaction structure, system architecture, building blocks, how Zswap/Kachina/Impact components fit together, bindings, commitments, or Schnorr proofs.
 ---
 
 # Midnight Architecture

@@ -1,7 +1,6 @@
 ---
-name: event-subscriptions
-description: This skill should be used when the user asks to "subscribe to events", "real-time blockchain events", "websocket subscription", "contract event stream", "event listener", "listen for transactions", or mentions real-time updates from the Midnight blockchain. Provides patterns for WebSocket subscriptions to blockchain events.
-version: 0.1.0
+name: midnight-indexer:event-subscriptions
+description: Use when subscribing to real-time blockchain events, setting up WebSocket connections, monitoring contract state changes, building live dashboards, or implementing push notifications from Midnight.
 ---
 
 # Event Subscriptions

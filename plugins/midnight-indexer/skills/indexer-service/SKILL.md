@@ -1,7 +1,6 @@
 ---
-name: indexer-service
-description: This skill should be used when the user asks to "query indexer", "fetch blockchain data", "get account balance", "list transactions", "read contract state from indexer", "indexer API", or mentions querying the Midnight blockchain. Provides patterns for connecting to and querying the Midnight Network indexer service.
-version: 0.1.0
+name: midnight-indexer:indexer-service
+description: Use when querying the Midnight indexer for blockchain data, fetching account balances, listing transactions, reading contract state, or building data-driven DApp backends.
 ---
 
 # Indexer Service

@@ -1,6 +1,6 @@
 ---
-name: testing-review
-description: Test coverage and quality assessment for Compact smart contracts including edge cases and testing strategies
+name: compact-reviewer:testing-review
+description: Use when reviewing test coverage for Compact contracts, identifying missing edge cases, evaluating testing strategies, or assessing test quality and completeness.
 ---
 
 # Testing Review Skill

@@ -1,24 +1,6 @@
 ---
-name: standard-library
-description: CompactStandardLibrary reference - crypto functions, utility types, token operations, and time functions
-triggers:
-  - CompactStandardLibrary
-  - Maybe
-  - Either
-  - persistentHash
-  - transientHash
-  - persistentCommit
-  - transientCommit
-  - ecAdd
-  - ecMul
-  - mintToken
-  - send
-  - receive
-  - mergeCoin
-  - CoinInfo
-  - blockTime
-  - blockTimeBefore
-  - blockTimeAfter
+name: compact-core:standard-library
+description: Use when importing from CompactStandardLibrary, working with crypto functions (persistentHash, persistentCommit, ecAdd, ecMul), utility types (Maybe, Either), token operations (mintToken, send, receive, mergeCoin), or time functions (blockTime, blockTimeBefore, blockTimeAfter).
 ---
 
 # Compact Standard Library

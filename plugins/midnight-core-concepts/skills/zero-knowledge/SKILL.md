@@ -1,6 +1,6 @@
 ---
-name: Midnight Zero-Knowledge Proofs
-description: This skill should be used when the user asks about "zero knowledge", "ZK", "proof", "SNARK", "circuit", "witness", "prover", "verifier", "constraint", or needs to understand how Midnight uses zero-knowledge proofs for privacy. Covers ZK SNARKs, circuit compilation, and proof generation.
+name: midnight-core-concepts:zero-knowledge
+description: Use when asking about zero-knowledge proofs, ZK SNARKs, circuit compilation, witness data, prover/verifier roles, constraints, or how Midnight uses ZK for privacy.
 ---
 
 # Zero-Knowledge Proofs in Midnight

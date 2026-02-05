@@ -1,7 +1,6 @@
 ---
-name: Prover Optimization
-description: This skill should be used when the user asks to "optimize prover", "prover performance", "proof generation speed", "prover memory usage", "parallel proof generation", "prover worker pool", or mentions improving ZK proof generation performance. Provides guidance for optimizing prover services in production.
-version: 0.1.0
+name: midnight-proofs:prover-optimization
+description: Use when optimizing prover performance, reducing proof generation memory usage, configuring prover infrastructure in Docker or Kubernetes, implementing parallel proof generation, or diagnosing prover bottlenecks.
 ---
 
 # Prover Optimization

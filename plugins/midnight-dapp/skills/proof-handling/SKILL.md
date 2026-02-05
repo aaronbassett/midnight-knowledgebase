@@ -1,6 +1,6 @@
 ---
-name: proof-handling
-description: Handle zero-knowledge proofs in Midnight DApp UI
+name: midnight-dapp:proof-handling
+description: Use when building witness data for ZK proofs, showing proof generation progress to users, implementing disclosure consent flows, handling proof timeouts and retries, or explaining privacy guarantees.
 ---
 
 # Proof Handling

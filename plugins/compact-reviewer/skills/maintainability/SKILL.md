@@ -1,6 +1,6 @@
 ---
-name: maintainability
-description: Long-term maintainability assessment for Compact smart contracts including modularity, technical debt, and upgrade patterns
+name: compact-reviewer:maintainability
+description: Use when reviewing Compact contracts for long-term maintainability, identifying technical debt, planning upgrade strategies, or assessing modularity and refactoring needs.
 ---
 
 # Maintainability Skill

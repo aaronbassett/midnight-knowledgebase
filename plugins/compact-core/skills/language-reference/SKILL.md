@@ -1,6 +1,6 @@
 ---
-name: language-reference
-description: Complete Compact language reference covering types, circuits, witnesses, control flow, and modules
+name: compact-core:language-reference
+description: Use when writing Compact smart contracts and need reference for primitive types (Field, Boolean, Uint), composite types (struct, enum, Vector, Bytes), circuit/witness syntax, control flow (if/else, for loops, assert), or module system (import, include, export).
 ---
 
 # Compact Language Reference

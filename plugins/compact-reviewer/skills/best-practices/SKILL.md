@@ -1,6 +1,6 @@
 ---
-name: best-practices
-description: Idiomatic Compact usage guidance including common patterns, recommended practices, and mistakes to avoid
+name: compact-reviewer:best-practices
+description: Use when reviewing Compact contracts for idiomatic patterns, learning recommended practices, or identifying common mistakes to avoid in Midnight smart contract development.
 ---
 
 # Best Practices Skill

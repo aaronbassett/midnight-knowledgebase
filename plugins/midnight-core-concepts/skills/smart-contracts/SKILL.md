@@ -1,6 +1,6 @@
 ---
-name: Midnight Smart Contracts
-description: This skill should be used when the user asks about "smart contract", "Compact", "Impact", "contract state", "public state", "private state", "circuit", "entry point", "deploy", "transaction", or needs to understand how Midnight contracts work. Covers Compact language, Impact VM, state separation, and execution model.
+name: midnight-core-concepts:smart-contracts
+description: Use when asking about Midnight smart contracts, Compact language basics, Impact VM, contract state separation, circuit entry points, deployment, or transaction execution model.
 ---
 
 # Midnight Smart Contracts

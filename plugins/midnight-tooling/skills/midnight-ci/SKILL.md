@@ -1,7 +1,6 @@
 ---
-name: Midnight CI
-description: This skill should be used when the user asks about "Midnight CI", "GitHub workflow for Midnight", "CI/CD for Compact contracts", "test compilation in CI", "Midnight GitHub Actions", "automate contract compilation", or needs to set up continuous integration for Midnight projects.
-version: 0.1.0
+name: midnight-tooling:midnight-ci
+description: Use when setting up CI/CD for Midnight projects, configuring GitHub Actions for Compact contract compilation, running TypeScript tests in CI, validating version consistency, or automating contract builds.
 ---
 
 # Midnight CI/CD Setup

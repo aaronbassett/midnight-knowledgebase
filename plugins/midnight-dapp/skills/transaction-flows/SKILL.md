@@ -1,6 +1,6 @@
 ---
-name: transaction-flows
-description: Submit transactions end-to-end in Midnight DApps
+name: midnight-dapp:transaction-flows
+description: Use when submitting transactions to Midnight contracts, tracking transaction status, implementing retry logic, building responsive UIs during proof generation, or understanding the build-prove-submit-confirm flow.
 ---
 
 # Transaction Flows

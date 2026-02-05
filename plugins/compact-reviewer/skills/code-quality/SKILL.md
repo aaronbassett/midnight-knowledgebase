@@ -1,6 +1,6 @@
 ---
-name: code-quality
-description: Readability, organization, and documentation assessment for Compact smart contracts
+name: compact-reviewer:code-quality
+description: Use when reviewing Compact code for readability issues, naming conventions, code organization, documentation quality, or consistent formatting and style.
 ---
 
 # Code Quality Skill

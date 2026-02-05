@@ -34,6 +34,7 @@ __pycache__/
 
 # SDD artifacts
 .sdd/
+docs/
 specs/
 discovery/
 

@@ -1,14 +1,6 @@
 ---
-name: typescript-integration
-description: TypeScript integration with Compact contracts - witness implementation, type mapping, contract APIs, and DApp development patterns
-triggers:
-  - witness implementation
-  - TypeScript
-  - DApp
-  - contract interaction
-  - type mapping
-  - bigint
-  - Uint8Array
+name: compact-core:typescript-integration
+description: Use when implementing witness functions in TypeScript, mapping Compact types to TypeScript (Field→bigint, Bytes→Uint8Array), deploying contracts, calling circuits from TypeScript, reading ledger state, or building Midnight DApps with the JavaScript SDK.
 ---
 
 # TypeScript Integration
