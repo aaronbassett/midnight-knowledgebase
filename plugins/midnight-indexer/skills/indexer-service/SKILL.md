@@ -228,9 +228,9 @@ async function queryWithRetry<T>(
 ## Related Skills
 
 - `event-subscriptions` - Real-time WebSocket event streams
-- `contract-calling` - Invoking contracts that change state
-- `state-management` - Frontend state synchronization with indexer
+- `midnight-tooling:contract-calling` - Invoking contracts that change state
+- `midnight-dapp:state-management` - Frontend state synchronization with indexer
 
 ## Related Commands
 
-- `/midnight:check` - Verify indexer connectivity
+- `/midnight-tooling:check` - Verify indexer connectivity

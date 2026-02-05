@@ -61,7 +61,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     fi
 
     # Check for multiple statements on same line (simple heuristic)
-    if [[ "$line" =~ \;.*\; ]] && [[ ! "$line" =~ for.*\;.*\;.*\; ]]; then
+    # Note: Compact uses `for i in start..end`, not C-style for(;;)
+    if [[ "$line" =~ \;.*\; ]]; then
         ISSUES+=("Line $LINE_NUM: Multiple statements on same line")
     fi
 

@@ -210,9 +210,9 @@ interface UTXO {
 }
 
 function selectUTXOs(utxos: UTXO[], targetAmount: bigint): UTXO[] {
-  // Sort by amount descending
+  // Sort by amount descending (use comparison operators to avoid BigInt precision loss)
   const sorted = [...utxos].sort((a, b) =>
-    Number(b.amount - a.amount)
+    b.amount > a.amount ? 1 : b.amount < a.amount ? -1 : 0
   );
 
   const selected: UTXO[] = [];

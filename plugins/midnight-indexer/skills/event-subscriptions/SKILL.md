@@ -303,13 +303,18 @@ class SubscriptionManager {
 class EventBuffer<T> {
   private buffer: T[] = [];
   private processing = false;
+  private intervalHandle: ReturnType<typeof setInterval>;
 
   constructor(
     private processor: (events: T[]) => Promise<void>,
     private maxSize = 100,
     private flushInterval = 1000
   ) {
-    setInterval(() => this.flush(), flushInterval);
+    this.intervalHandle = setInterval(() => this.flush(), flushInterval);
+  }
+
+  destroy(): void {
+    clearInterval(this.intervalHandle);
   }
 
   push(event: T): void {
@@ -342,9 +347,9 @@ class EventBuffer<T> {
 ## Related Skills
 
 - `indexer-service` - Query historical blockchain data
-- `state-management` - Sync frontend state with events
-- `transaction-flows` - Submit transactions and track status
+- `midnight-dapp:state-management` - Sync frontend state with events
+- `midnight-dapp:transaction-flows` - Submit transactions and track status
 
 ## Related Commands
 
-- `/midnight:check` - Verify WebSocket connectivity
+- `/midnight-tooling:check` - Verify WebSocket connectivity

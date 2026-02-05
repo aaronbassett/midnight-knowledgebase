@@ -2,7 +2,7 @@
 name: dapp-sdd:start
 description: Clone a repo, create a draft PR, read the README spec, and post clarifying questions
 argument-hint: owner/repo@branch
-allowed_tools: Bash, Read, Write, Glob, Grep, Skill
+allowed-tools: Bash, Read, Write, Glob, Grep, Skill
 ---
 
 # /dapp-sdd:start

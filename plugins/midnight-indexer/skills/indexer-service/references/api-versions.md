@@ -181,7 +181,9 @@ function createVersionedClient(uri: string, version: string): IndexerClient {
     version,
     async query(query, variables) {
       // Transform queries for older versions if needed
-      const transformedQuery = version < '2.1.0'
+      const [major, minor, patch] = version.split('.').map(Number);
+      const isLegacy = major < 2 || (major === 2 && minor < 1);
+      const transformedQuery = isLegacy
         ? transformForLegacy(query)
         : query;
 

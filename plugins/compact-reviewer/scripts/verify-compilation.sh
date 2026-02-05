@@ -79,7 +79,7 @@ COMPILE_CMD="$COMPILE_CMD $FILE"
 
 # Create temp directory for output
 TEMP_DIR=$(mktemp -d)
-trap "rm -rf $TEMP_DIR" EXIT
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Run compilation
 if OUTPUT=$($COMPILE_CMD -o "$TEMP_DIR" 2>&1); then
