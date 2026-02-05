@@ -1,0 +1,17 @@
+{
+  "name": "dapp-sdd",
+  "version": "0.1.0",
+  "description": "Streamlined specification-driven development for Midnight Network example dApps. PR-centric workflow with autonomous implementation and mandatory code reviews.",
+  "author": {
+    "name": "Aaron Bassett"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "midnight",
+    "dapp",
+    "sdd",
+    "compact",
+    "example",
+    "autonomous"
+  ]
+}
