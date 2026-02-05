@@ -72,6 +72,38 @@
         "typescript",
         "web3"
       ]
+    },
+    {
+      "source": "./plugins/midnight-proofs",
+      "name": "midnight-proofs",
+      "description": "Server-side ZK proof generation, verification, and optimization for Midnight Network. Offload proof computation from clients, implement proof caching, and optimize prover performance.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "zero-knowledge",
+        "proofs",
+        "prover",
+        "verification",
+        "server-side",
+        "performance",
+        "zk-snarks"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-indexer",
+      "name": "midnight-indexer",
+      "description": "Query blockchain data from Midnight Network. Transaction history, contract state, event subscriptions for building data-driven DApps.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "indexer",
+        "blockchain",
+        "queries",
+        "events",
+        "subscriptions",
+        "graphql",
+        "websocket"
+      ]
     }
   ]
 }
