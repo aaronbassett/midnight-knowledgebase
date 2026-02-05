@@ -1,0 +1,211 @@
+# Clone Examples Catalog
+# Curated list of Midnight Compact contract examples and starter projects
+
+examples:
+  # ============================================================================
+  # OpenZeppelin
+  # ============================================================================
+
+  - name: fungible-token
+    title: Fungible Token (ERC20-like)
+    description: >
+      OpenZeppelin's token implementation with mint, burn, transfer, and
+      allowance patterns. Alpha-stage but well-documented with circuit
+      resource metrics.
+    clone_url: https://github.com/OpenZeppelin/compact-contracts.git
+    path: contracts/src/token/FungibleToken.compact
+    source: OpenZeppelin
+    license: MIT
+    last_updated: 2026-02-04
+    tags: [token, defi, beginner]
+    compatibility:
+      compact_runtime: ">=0.9.0"
+      network: testnet
+
+  - name: non-fungible-token
+    title: Non-Fungible Token (NFT)
+    description: >
+      OpenZeppelin's NFT implementation with ownership tracking, transfers,
+      and approval mechanisms. Includes minting and burning capabilities.
+    clone_url: https://github.com/OpenZeppelin/compact-contracts.git
+    path: contracts/src/token/NonFungibleToken.compact
+    source: OpenZeppelin
+    license: MIT
+    last_updated: 2026-02-04
+    tags: [token, nft, intermediate]
+    compatibility:
+      compact_runtime: ">=0.9.0"
+      network: testnet
+
+  - name: multi-token
+    title: Multi-Token (ERC1155-like)
+    description: >
+      OpenZeppelin's multi-token implementation supporting both fungible
+      and non-fungible tokens in a single contract. Batch operations included.
+    clone_url: https://github.com/OpenZeppelin/compact-contracts.git
+    path: contracts/src/token/MultiToken.compact
+    source: OpenZeppelin
+    license: MIT
+    last_updated: 2026-02-04
+    tags: [token, nft, defi, intermediate]
+    compatibility:
+      compact_runtime: ">=0.9.0"
+      network: testnet
+
+  - name: lunarswap
+    title: LunarSwap DEX
+    description: >
+      Full-stack decentralized exchange application with AMM contracts,
+      shielded tokens, and React UI. Demonstrates complete DApp architecture.
+    clone_url: https://github.com/OpenZeppelin/midnight-apps.git
+    path: /
+    source: OpenZeppelin
+    license: MIT
+    last_updated: 2026-01-22
+    tags: [defi, dex, full-app, advanced]
+    compatibility:
+      compact_runtime: ">=0.9.0"
+      node: "22.x"
+      network: testnet
+
+  # ============================================================================
+  # Midnight Official
+  # ============================================================================
+
+  - name: counter
+    title: Counter Example
+    description: >
+      Official Midnight starter project. Simple counter contract with CLI
+      for deployment and interaction. Great first project for learning
+      the development workflow.
+    clone_url: https://github.com/midnightntwrk/example-counter.git
+    path: /
+    source: Midnight Official
+    license: Apache-2.0
+    last_updated: 2026-02-05
+    tags: [beginner, cli, full-app]
+    compatibility:
+      network: testnet
+
+  - name: bboard
+    title: Bulletin Board
+    description: >
+      Official Midnight example with both CLI and React UI. Demonstrates
+      posting and reading messages with privacy features. Good introduction
+      to building full DApps.
+    clone_url: https://github.com/midnightntwrk/example-bboard.git
+    path: /
+    source: Midnight Official
+    license: Apache-2.0
+    last_updated: 2026-02-05
+    tags: [beginner, cli, ui, full-app]
+    compatibility:
+      network: testnet
+
+  - name: midnight-contracts
+    title: Contract Library
+    description: >
+      Essential smart contracts library for Midnight development.
+      Includes reusable patterns for NFTs, access control, and common
+      contract utilities.
+    clone_url: https://github.com/riusricardo/midnight-contracts.git
+    path: /
+    source: Midnight Official
+    license: GPL-3.0
+    last_updated: 2025-09-01
+    tags: [library, patterns, intermediate]
+    compatibility:
+      compact_runtime: ">=0.8.1"
+      network: testnet
+
+  - name: midnight-kitties
+    title: Midnight Kitties NFT Game
+    description: >
+      CryptoKitties-inspired full-stack NFT showcase. Features Compact
+      smart contract, CLI tools, API server, and React web app.
+      Demonstrates complete production architecture.
+    clone_url: https://github.com/riusricardo/midnight-kitties.git
+    path: /
+    source: Midnight Official
+    license: GPL-3.0
+    last_updated: 2025-10-28
+    tags: [nft, game, full-app, advanced]
+    compatibility:
+      compact_runtime: ">=0.8.1"
+      midnight_js: "2.0.2"
+      network: testnet
+
+  # ============================================================================
+  # Partner
+  # ============================================================================
+
+  - name: midnight-local-network
+    title: Local Test Network
+    description: >
+      Brick Towers local test network setup. Run a complete Midnight
+      environment locally for development and testing. Includes funding
+      scripts and Docker configuration.
+    clone_url: https://github.com/bricktowers/midnight-local-network.git
+    path: /
+    source: Partner
+    license: MIT
+    last_updated: 2026-02-05
+    tags: [tooling, testing, devops, intermediate]
+    compatibility:
+      ledger: "7.0.0"
+      network: local
+
+  - name: midnight-rwa
+    title: Real World Assets
+    description: >
+      Privacy-first RWA trading system using shielded tokens. Full-stack
+      application with identity verification, RWA contracts, API backend,
+      and React UI.
+    clone_url: https://github.com/bricktowers/midnight-rwa.git
+    path: /
+    source: Partner
+    license: MIT
+    last_updated: 2025-11-19
+    tags: [defi, rwa, identity, full-app, advanced]
+    compatibility:
+      compact_runtime: "0.9.0"
+      midnight_js: "2.0.2"
+      network: testnet
+
+  # ============================================================================
+  # Community
+  # ============================================================================
+
+  - name: midnight-dex-contract
+    title: AMM DEX Contract
+    description: >
+      Pulse Finance AMM DEX contracts written in Compact. Includes
+      automated market maker, faucet, and combined faucet-AMM contracts.
+      Uses latest runtime features.
+    clone_url: https://github.com/pulse-finance/midnight-dex-contract.git
+    path: /
+    source: Community
+    license: MIT
+    last_updated: 2026-01-27
+    tags: [defi, dex, amm, intermediate]
+    compatibility:
+      compact_runtime: "0.11.0-rc.1"
+      network: testnet
+
+  - name: midnight-fund
+    title: Crowdfunding Platform
+    description: >
+      Privacy-preserving crowdfunding smart contracts. Full-stack
+      application with contract, CLI, API, and UI packages.
+      Demonstrates complete project structure.
+    clone_url: https://github.com/socious-io/midnight-fund.git
+    path: /
+    source: Community
+    license: MIT
+    last_updated: 2026-01-24
+    tags: [crowdfunding, governance, full-app, intermediate]
+    compatibility:
+      compact_runtime: ">=0.9.0"
+      midnight_js: "2.0.2"
+      node: ">=22"
+      network: testnet
