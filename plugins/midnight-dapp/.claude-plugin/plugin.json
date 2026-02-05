@@ -17,8 +17,5 @@
     "react",
     "typescript",
     "web3"
-  ],
-  "dependencies": [
-    "compact-core"
   ]
 }
