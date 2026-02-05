@@ -53,6 +53,25 @@
         "smart-contracts",
         "developer-tools"
       ]
+    },
+    {
+      "source": "./plugins/midnight-dapp",
+      "name": "midnight-dapp",
+      "description": "Frontend DApp development for Midnight Network. Wallet integration, zero-knowledge proof handling, state management, transaction flows, error handling, and testing patterns.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "dapp",
+        "frontend",
+        "wallet",
+        "lace",
+        "zero-knowledge",
+        "proofs",
+        "transactions",
+        "react",
+        "typescript",
+        "web3"
+      ]
     }
   ]
 }

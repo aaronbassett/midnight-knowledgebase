@@ -1,0 +1,21 @@
+{
+  "name": "midnight-dapp",
+  "version": "0.0.1",
+  "description": "Frontend DApp development for Midnight Network. Wallet integration, zero-knowledge proof handling, state management, transaction flows, error handling, and testing patterns. Framework-agnostic with React examples.",
+  "author": {
+    "name": "Midnight Knowledgebase"
+  },
+  "keywords": [
+    "midnight",
+    "dapp",
+    "frontend",
+    "wallet",
+    "lace",
+    "zero-knowledge",
+    "proofs",
+    "transactions",
+    "react",
+    "typescript",
+    "web3"
+  ]
+}
