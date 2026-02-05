@@ -1,6 +1,6 @@
 {
   "name": "midnight-expert",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Plugins and skills to turn AI coding assistants into Midnight Network experts",
   "owner": {
     "name": "Aaron Bassett",
@@ -10,6 +10,23 @@
   "repository": "https://github.com/aaronbassett/midnight-expert.git",
   "license": "MIT",
   "keywords": [
-    "midnight network"
+    "midnight network",
+    "compact",
+    "smart contracts",
+    "zk-proofs",
+    "blockchain"
+  ],
+  "plugins": [
+    {
+      "name": "compact-core",
+      "path": "./compact-core",
+      "description": "Comprehensive Compact language knowledge base covering syntax, types, privacy model, ledger ADTs, and standard library"
+    },
+    {
+      "name": "compact-reviewer",
+      "path": "./compact-reviewer",
+      "description": "Deep-dive code reviews for Compact smart contracts across 8 dimensions: security, critical issues, performance, architecture, best practices, code quality, testing, and maintainability",
+      "dependencies": ["compact-core"]
+    }
   ]
 }
