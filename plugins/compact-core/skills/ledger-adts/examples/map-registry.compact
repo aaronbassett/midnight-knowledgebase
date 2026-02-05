@@ -1,0 +1,262 @@
+// map-registry.compact - Map ADT for registry patterns
+// Demonstrates Map operations for user/entity management
+
+import { persistentHash, Maybe } from "CompactStandardLibrary";
+
+// ============================================
+// Types
+// ============================================
+
+struct User {
+    id: Bytes<32>,
+    name_hash: Bytes<32>,
+    balance: Uint<64>,
+    status: UserStatus,
+    created_at: Uint<64>
+}
+
+enum UserStatus {
+    Active,
+    Suspended,
+    Deleted
+}
+
+struct Token {
+    id: Uint<64>,
+    name_hash: Bytes<32>,
+    total_supply: Uint<64>,
+    owner: Bytes<32>
+}
+
+// ============================================
+// Ledger State
+// ============================================
+
+ledger users: Map<Bytes<32>, User>;
+ledger token_registry: Map<Uint<64>, Token>;
+ledger user_balances: Map<Bytes<32>, Map<Uint<64>, Uint<64>>>;  // user -> token -> balance
+ledger next_token_id: Counter;
+
+// ============================================
+// User Registry Operations
+// ============================================
+
+/// Register a new user
+export circuit register_user(
+    id: Bytes<32>,
+    name_hash: Bytes<32>,
+    timestamp: Uint<64>
+): Boolean {
+    // Check if user already exists
+    const existing = users.lookup(id);
+    if existing is Maybe::Some(_) {
+        return false;  // Already registered
+    }
+
+    // Create new user
+    const user = User {
+        id: id,
+        name_hash: name_hash,
+        balance: 0,
+        status: UserStatus::Active,
+        created_at: timestamp
+    };
+
+    users.insert(id, user);
+    return true;
+}
+
+/// Get user by ID
+export circuit get_user(id: Bytes<32>): User {
+    const user_opt = users.lookup(id);
+    assert user_opt is Maybe::Some(_), "User not found";
+
+    if user_opt is Maybe::Some(user) {
+        return user;
+    }
+
+    // Unreachable but required for compiler
+    return User {
+        id: id,
+        name_hash: 0x0000000000000000000000000000000000000000000000000000000000000000,
+        balance: 0,
+        status: UserStatus::Deleted,
+        created_at: 0
+    };
+}
+
+/// Update user status
+export circuit update_user_status(id: Bytes<32>, new_status: UserStatus): [] {
+    const user_opt = users.lookup(id);
+    assert user_opt is Maybe::Some(_), "User not found";
+
+    if user_opt is Maybe::Some(user) {
+        const updated = User {
+            id: user.id,
+            name_hash: user.name_hash,
+            balance: user.balance,
+            status: new_status,
+            created_at: user.created_at
+        };
+        users.insert(id, updated);
+    }
+}
+
+/// Add balance to user
+export circuit add_user_balance(id: Bytes<32>, amount: Uint<64>): Uint<64> {
+    const user_opt = users.lookup(id);
+    assert user_opt is Maybe::Some(_), "User not found";
+
+    if user_opt is Maybe::Some(user) {
+        assert user.status is UserStatus::Active, "User not active";
+
+        const new_balance = user.balance + amount;
+        const updated = User {
+            id: user.id,
+            name_hash: user.name_hash,
+            balance: new_balance,
+            status: user.status,
+            created_at: user.created_at
+        };
+        users.insert(id, updated);
+        return new_balance;
+    }
+
+    return 0;
+}
+
+/// Remove user from registry
+export circuit remove_user(id: Bytes<32>): [] {
+    users.remove(id);
+}
+
+/// Check if user exists
+export circuit user_exists(id: Bytes<32>): Boolean {
+    const user_opt = users.lookup(id);
+    return user_opt is Maybe::Some(_);
+}
+
+/// Check if user is active
+export circuit is_user_active(id: Bytes<32>): Boolean {
+    const user_opt = users.lookup(id);
+    if user_opt is Maybe::Some(user) {
+        return user.status is UserStatus::Active;
+    }
+    return false;
+}
+
+// ============================================
+// Token Registry Operations
+// ============================================
+
+/// Create a new token
+export circuit create_token(
+    name_hash: Bytes<32>,
+    initial_supply: Uint<64>,
+    owner: Bytes<32>
+): Uint<64> {
+    // Get next token ID
+    const token_id = next_token_id.value();
+    next_token_id.increment(1);
+
+    // Create token
+    const token = Token {
+        id: token_id,
+        name_hash: name_hash,
+        total_supply: initial_supply,
+        owner: owner
+    };
+
+    token_registry.insert(token_id, token);
+
+    return token_id;
+}
+
+/// Get token info
+export circuit get_token(token_id: Uint<64>): Token {
+    const token_opt = token_registry.lookup(token_id);
+    assert token_opt is Maybe::Some(_), "Token not found";
+
+    if token_opt is Maybe::Some(token) {
+        return token;
+    }
+
+    // Unreachable
+    return Token {
+        id: 0,
+        name_hash: 0x0000000000000000000000000000000000000000000000000000000000000000,
+        total_supply: 0,
+        owner: 0x0000000000000000000000000000000000000000000000000000000000000000
+    };
+}
+
+/// Mint additional tokens
+export circuit mint_tokens(token_id: Uint<64>, amount: Uint<64>, caller: Bytes<32>): [] {
+    const token_opt = token_registry.lookup(token_id);
+    assert token_opt is Maybe::Some(_), "Token not found";
+
+    if token_opt is Maybe::Some(token) {
+        assert token.owner == caller, "Only owner can mint";
+
+        const updated = Token {
+            id: token.id,
+            name_hash: token.name_hash,
+            total_supply: token.total_supply + amount,
+            owner: token.owner
+        };
+        token_registry.insert(token_id, updated);
+    }
+}
+
+// ============================================
+// Transfer Between Users
+// ============================================
+
+/// Transfer balance between users
+export circuit transfer(
+    from: Bytes<32>,
+    to: Bytes<32>,
+    amount: Uint<64>
+): Boolean {
+    // Get sender
+    const sender_opt = users.lookup(from);
+    if sender_opt is Maybe::None {
+        return false;
+    }
+
+    // Get or create recipient
+    const recipient_opt = users.lookup(to);
+
+    if sender_opt is Maybe::Some(sender) {
+        // Check sender balance
+        if sender.balance < amount {
+            return false;
+        }
+
+        // Debit sender
+        const updated_sender = User {
+            id: sender.id,
+            name_hash: sender.name_hash,
+            balance: sender.balance - amount,
+            status: sender.status,
+            created_at: sender.created_at
+        };
+        users.insert(from, updated_sender);
+
+        // Credit recipient
+        if recipient_opt is Maybe::Some(recipient) {
+            const updated_recipient = User {
+                id: recipient.id,
+                name_hash: recipient.name_hash,
+                balance: recipient.balance + amount,
+                status: recipient.status,
+                created_at: recipient.created_at
+            };
+            users.insert(to, updated_recipient);
+        }
+
+        return true;
+    }
+
+    return false;
+}

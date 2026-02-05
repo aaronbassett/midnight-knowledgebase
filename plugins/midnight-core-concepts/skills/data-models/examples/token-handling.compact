@@ -1,0 +1,93 @@
+// Token Handling Patterns in Compact
+
+// =============================================================================
+// RECEIVING TOKENS
+// =============================================================================
+
+// Receive coins into a contract
+// Coins are UTXO-based, received via Zswap
+ledger {
+  received_count: Field;
+}
+
+export circuit receivePayment(): Void {
+  // Coins received via Zswap offer are available here
+  receive coins: Coin[];
+
+  // Track that we received something
+  ledger.received_count = ledger.received_count + 1;
+}
+
+// =============================================================================
+// SENDING TOKENS
+// =============================================================================
+
+ledger {
+  treasury_balance: Field;  // Logical tracking only
+}
+
+export circuit sendReward(
+  amount: Field,
+  recipient: Address
+): Void {
+  // Send tokens via Zswap
+  // This creates a new UTXO owned by recipient
+  send { value: amount, type: native_token }, to: recipient;
+
+  // Update logical tracking
+  ledger.treasury_balance = ledger.treasury_balance - amount;
+}
+
+// =============================================================================
+// CUSTOM TOKEN ISSUANCE
+// =============================================================================
+
+ledger {
+  total_supply: Field;
+}
+
+// Issue new custom tokens
+// Token type = Hash(this_contract_address, domain_separator)
+export circuit mint(
+  amount: Field,
+  recipient: Address,
+  domain_separator: Bytes<32>
+): Void {
+  // Mint creates new tokens (increases supply)
+  mint { value: amount, domain: domain_separator }, to: recipient;
+
+  ledger.total_supply = ledger.total_supply + amount;
+}
+
+// =============================================================================
+// SHIELDED VS UNSHIELDED
+// =============================================================================
+
+// By default, tokens are shielded (private)
+// The commitment hides value, type, and owner
+
+// For regulatory compliance, viewing keys can be shared
+// This doesn't change the code—it's a wallet-level feature
+
+// Pattern: Accept both shielded and unshielded inputs
+export circuit flexibleDeposit(): Void {
+  receive coins: Coin[];
+  // Coins can be shielded or unshielded
+  // Contract treats them identically
+}
+
+// =============================================================================
+// TOKEN TYPE CHECKING
+// =============================================================================
+
+ledger {
+  accepted_token: Bytes<32>;
+}
+
+export circuit depositSpecificToken(): Void {
+  receive coins: Coin[];
+
+  // In practice, token type filtering happens at Zswap level
+  // Contract specifies which token types it accepts
+  // Invalid types rejected before contract execution
+}

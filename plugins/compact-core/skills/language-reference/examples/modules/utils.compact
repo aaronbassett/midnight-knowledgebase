@@ -1,0 +1,95 @@
+// utils.compact - Utility functions
+// Included by other files in this module
+
+include "types.compact";
+import { persistentHash } from "CompactStandardLibrary";
+
+// ============================================
+// Validation utilities
+// ============================================
+
+export circuit is_valid_amount(amount: Uint<64>): Boolean {
+    // Amount must be positive and within reasonable bounds
+    return amount > 0 && amount <= 1000000000;
+}
+
+export circuit is_active_user(user: User): Boolean {
+    return user.status is UserStatus::Active;
+}
+
+// ============================================
+// Fee calculations
+// ============================================
+
+export circuit calculate_fee(amount: Uint<64>, fee_rate: Uint<64>): Uint<64> {
+    // fee_rate is basis points (1/100th of a percent)
+    // e.g., fee_rate = 100 means 1%
+    const fee = (amount * fee_rate) / 10000;
+    return if fee > 0 { fee } else { 1 };  // Minimum fee of 1
+}
+
+export circuit calculate_net_amount(amount: Uint<64>, fee_rate: Uint<64>): Uint<64> {
+    const fee = calculate_fee(amount, fee_rate);
+    return amount - fee;
+}
+
+// ============================================
+// Hashing utilities
+// ============================================
+
+export circuit hash_user(user: User): Bytes<32> {
+    return persistentHash(user.id, user.name_hash, user.balance as Field);
+}
+
+export circuit hash_transfer(transfer: Transfer): Bytes<32> {
+    return persistentHash(
+        transfer.from,
+        transfer.to,
+        transfer.amount as Field,
+        transfer.timestamp as Field
+    );
+}
+
+// ============================================
+// Array utilities
+// ============================================
+
+export circuit sum_amounts<#N>(amounts: Vector<Uint<64>, #N>): Uint<64> {
+    var total: Uint<64> = 0;
+    for i in 0..#N {
+        total = total + amounts[i];
+    }
+    return total;
+}
+
+export circuit max_amount<#N>(amounts: Vector<Uint<64>, #N>): Uint<64> {
+    var max: Uint<64> = 0;
+    for i in 0..#N {
+        if amounts[i] > max {
+            max = amounts[i];
+        }
+    }
+    return max;
+}
+
+// ============================================
+// Comparison utilities
+// ============================================
+
+export circuit min_uint(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return if a < b { a } else { b };
+}
+
+export circuit max_uint(a: Uint<64>, b: Uint<64>): Uint<64> {
+    return if a > b { a } else { b };
+}
+
+export circuit clamp(value: Uint<64>, min_val: Uint<64>, max_val: Uint<64>): Uint<64> {
+    return if value < min_val {
+        min_val
+    } else if value > max_val {
+        max_val
+    } else {
+        value
+    };
+}

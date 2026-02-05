@@ -1,0 +1,197 @@
+// types.compact - Compact type system examples
+// Demonstrates all primitive and composite types
+
+import { persistentHash } from "CompactStandardLibrary";
+
+// ============================================
+// Primitive Types
+// ============================================
+
+// Field: ZK-native field element (~254 bits)
+circuit field_example(): Field {
+    const a: Field = 42;
+    const b: Field = 100;
+    const sum: Field = a + b;
+    const product: Field = a * b;
+    return sum + product;
+}
+
+// Boolean: true/false values
+circuit boolean_example(): Boolean {
+    const yes: Boolean = true;
+    const no: Boolean = false;
+    const and_result: Boolean = yes && no;
+    const or_result: Boolean = yes || no;
+    const not_result: Boolean = !yes;
+    return and_result || or_result || not_result;
+}
+
+// Uint<N>: Unsigned integers with specified bit width
+circuit uint_example(): Uint<64> {
+    const small: Uint<8> = 255;
+    const medium: Uint<32> = 1000000;
+    const large: Uint<64> = 9999999999;
+
+    // Arithmetic
+    const sum: Uint<64> = medium as Uint<64> + large;
+    const diff: Uint<64> = large - medium as Uint<64>;
+
+    // Comparisons
+    const is_greater: Boolean = large > medium as Uint<64>;
+
+    return sum;
+}
+
+// ============================================
+// Composite Types
+// ============================================
+
+// Bytes<N>: Fixed-size byte arrays
+circuit bytes_example(): Bytes<32> {
+    // 32-byte hash (common for addresses, hashes)
+    const hash: Bytes<32> = persistentHash(42);
+    return hash;
+}
+
+// struct: Named record types
+struct Point {
+    x: Field,
+    y: Field
+}
+
+struct Transfer {
+    from: Bytes<32>,
+    to: Bytes<32>,
+    amount: Uint<64>,
+    timestamp: Uint<64>
+}
+
+circuit struct_example(): Field {
+    // Struct construction
+    const origin: Point = Point { x: 0, y: 0 };
+    const p1: Point = Point { x: 10, y: 20 };
+
+    // Field access
+    const x_val: Field = p1.x;
+    const y_val: Field = p1.y;
+
+    return x_val + y_val;
+}
+
+// enum: Tagged union types
+enum Maybe<T> {
+    Some(T),
+    None
+}
+
+enum Result<T, E> {
+    Ok(T),
+    Err(E)
+}
+
+circuit enum_example(): Field {
+    // Enum construction
+    const some_value: Maybe<Field> = Maybe::Some(42);
+    const no_value: Maybe<Field> = Maybe::None;
+
+    // Pattern matching with if
+    const result: Field = if some_value is Maybe::Some(v) {
+        v
+    } else {
+        0
+    };
+
+    return result;
+}
+
+// Vector<T, N>: Fixed-size arrays
+circuit vector_example(): Field {
+    // Array literal
+    const nums: Vector<Field, 5> = [1, 2, 3, 4, 5];
+
+    // Fill with value
+    const zeros: Vector<Uint<8>, 10> = [0; 10];
+
+    // Indexing
+    const first: Field = nums[0];
+    const third: Field = nums[2];
+
+    // Sum elements
+    var total: Field = 0;
+    for i in 0..5 {
+        total = total + nums[i];
+    }
+
+    return total;
+}
+
+// ============================================
+// Generic Types
+// ============================================
+
+// Generic struct
+struct Pair<A, B> {
+    first: A,
+    second: B
+}
+
+// Generic circuit
+circuit swap<A, B>(pair: Pair<A, B>): Pair<B, A> {
+    return Pair { first: pair.second, second: pair.first };
+}
+
+// Size-generic circuit
+circuit sum_array<#N>(values: Vector<Field, #N>): Field {
+    var total: Field = 0;
+    for i in 0..#N {
+        total = total + values[i];
+    }
+    return total;
+}
+
+circuit generic_example(): Field {
+    const pair: Pair<Field, Boolean> = Pair { first: 42, second: true };
+    const swapped: Pair<Boolean, Field> = swap(pair);
+
+    const values: Vector<Field, 3> = [10, 20, 30];
+    const total: Field = sum_array(values);
+
+    return total;
+}
+
+// ============================================
+// Type Conversions
+// ============================================
+
+circuit conversion_example(): Field {
+    // Uint to Field
+    const u: Uint<64> = 100;
+    const f: Field = u as Field;
+
+    // Field to Uint (must fit in range)
+    const f2: Field = 50;
+    const u2: Uint<64> = f2 as Uint<64>;
+
+    // Widening Uint conversion
+    const small: Uint<8> = 200;
+    const wide: Uint<64> = small as Uint<64>;
+
+    return f + f2;
+}
+
+// ============================================
+// Exported circuit demonstrating types
+// ============================================
+
+export circuit demonstrate_types(): Field {
+    const f = field_example();
+    const b = boolean_example();
+    const u = uint_example();
+    const s = struct_example();
+    const e = enum_example();
+    const v = vector_example();
+    const g = generic_example();
+    const c = conversion_example();
+
+    return f + s + e + v + g + c;
+}

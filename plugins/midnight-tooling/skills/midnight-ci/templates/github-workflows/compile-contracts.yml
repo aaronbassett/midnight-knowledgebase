@@ -1,0 +1,100 @@
+# Midnight Contract Compilation Workflow
+# Verifies that Compact contracts compile successfully
+
+name: Compile Contracts
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+      - 'src/**/*.compact'
+      - '.github/workflows/compile-contracts.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'contracts/**'
+      - 'src/**/*.compact'
+
+env:
+  NODE_VERSION: '20'
+  # Pin compiler version for reproducibility
+  # Update this when upgrading - check /midnight:versions for latest
+  COMPACT_VERSION: '0.26.0'
+
+jobs:
+  compile:
+    name: Compile Contracts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Compact compiler
+        uses: actions/cache@v4
+        id: compact-cache
+        with:
+          path: ~/.compact
+          key: compact-${{ runner.os }}-${{ env.COMPACT_VERSION }}
+          restore-keys: |
+            compact-${{ runner.os }}-
+
+      - name: Install Compact developer tools
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.compact/bin" >> $GITHUB_PATH
+
+      - name: Install Compact compiler
+        if: steps.compact-cache.outputs.cache-hit != 'true'
+        run: |
+          compact update ${{ env.COMPACT_VERSION }}
+
+      - name: Verify compiler version
+        run: |
+          echo "Developer tools: $(compact --version)"
+          echo "Compiler: $(compact compile --version)"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Compile contracts
+        run: |
+          # Adjust paths to match your project structure
+          # Option 1: Single contract
+          # compact compile contracts/main.compact build/
+
+          # Option 2: Multiple contracts
+          for contract in contracts/*.compact; do
+            if [ -f "$contract" ]; then
+              name=$(basename "$contract" .compact)
+              echo "Compiling $name..."
+              compact compile "$contract" "build/$name/"
+            fi
+          done
+
+      - name: Verify compilation output
+        run: |
+          # Check that expected files were generated
+          if [ -d "build" ]; then
+            echo "Build artifacts:"
+            find build -type f -name "*.cjs" -o -name "*.d.cts" | head -20
+          else
+            echo "Error: No build directory found"
+            exit 1
+          fi
+
+      - name: Upload compiled contracts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-contracts
+          path: build/
+          retention-days: 7
+          if-no-files-found: error

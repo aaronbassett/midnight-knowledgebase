@@ -1,0 +1,205 @@
+// circuits.compact - Circuit and witness patterns
+// Demonstrates circuit definitions, witnesses, and calling conventions
+
+import { persistentHash, persistentCommit } from "CompactStandardLibrary";
+
+// ============================================
+// Basic Circuits
+// ============================================
+
+// Simple pure circuit
+circuit square(x: Field): Field {
+    return x * x;
+}
+
+// Circuit with multiple parameters
+circuit add_three(a: Field, b: Field, c: Field): Field {
+    return a + b + c;
+}
+
+// Circuit returning tuple
+circuit divmod(a: Uint<64>, b: Uint<64>): (Uint<64>, Uint<64>) {
+    assert b != 0, "Division by zero";
+    return (a / b, a % b);
+}
+
+// Circuit with no return (side effects via ledger)
+ledger stored_value: Cell<Field>;
+
+circuit store(value: Field): [] {
+    stored_value.write(value);
+}
+
+// ============================================
+// Witness Functions
+// ============================================
+
+// Witness declarations (implemented in TypeScript)
+witness get_private_key(): Bytes<32>;
+witness get_user_secret(user_id: Bytes<32>): Field;
+witness get_merkle_path(leaf_index: Uint<32>): Vector<Bytes<32>, 20>;
+
+// Using witnesses in circuits
+circuit sign_message(message: Bytes<32>): Bytes<32> {
+    const key = get_private_key();
+    // Combine key and message to create signature
+    const signature = persistentHash(key, message);
+    return signature;
+}
+
+// ============================================
+// Public vs Private Circuits
+// ============================================
+
+// Private helper - not callable from TypeScript
+circuit validate_amount(amount: Uint<64>): Boolean {
+    return amount > 0 && amount <= 1000000;
+}
+
+circuit compute_fee(amount: Uint<64>): Uint<64> {
+    // 1% fee, minimum 1
+    const fee = amount / 100;
+    return if fee > 0 { fee } else { 1 };
+}
+
+// Public circuit - callable from TypeScript
+export circuit transfer(amount: Uint<64>): Uint<64> {
+    assert validate_amount(amount), "Invalid amount";
+    const fee = compute_fee(amount);
+    const net_amount = amount - fee;
+    return net_amount;
+}
+
+// ============================================
+// Witness Protection Demo
+// ============================================
+
+witness get_secret(): Field;
+
+// BAD: This would cause a compiler error
+// export circuit bad_return_secret(): Field {
+//     const secret = get_secret();
+//     return secret;  // ERROR: witness value disclosure
+// }
+
+// GOOD: Explicitly disclose when intended
+export circuit reveal_secret(): Field {
+    const secret = get_secret();
+    return disclose(secret);  // OK: intentional disclosure
+}
+
+// GOOD: Use commitment instead
+export circuit commit_to_secret(): Bytes<32> {
+    const secret = get_secret();
+    const commitment = persistentCommit(secret);
+    return commitment;  // OK: commitment hides the secret
+}
+
+// GOOD: Derive public value from secret
+export circuit verify_knowledge(expected_hash: Bytes<32>): Boolean {
+    const secret = get_secret();
+    const actual_hash = persistentHash(secret);
+    return actual_hash == expected_hash;  // OK: comparing hashes
+}
+
+// ============================================
+// Generic Circuits
+// ============================================
+
+// Generic over type
+circuit identity<T>(x: T): T {
+    return x;
+}
+
+// Generic over size
+circuit first_element<#N>(arr: Vector<Field, #N>): Field {
+    return arr[0];
+}
+
+circuit last_element<#N>(arr: Vector<Field, #N>): Field {
+    return arr[#N - 1];
+}
+
+// Generic over both
+circuit map_double<#N>(arr: Vector<Field, #N>): Vector<Field, #N> {
+    var result: Vector<Field, #N> = [0; #N];
+    for i in 0..#N {
+        result[i] = arr[i] * 2;
+    }
+    return result;
+}
+
+export circuit generic_demo(): Field {
+    const arr: Vector<Field, 5> = [1, 2, 3, 4, 5];
+    const first = first_element(arr);
+    const last = last_element(arr);
+    const doubled = map_double(arr);
+
+    return first + last + doubled[0];
+}
+
+// ============================================
+// Circuit Composition
+// ============================================
+
+struct User {
+    id: Bytes<32>,
+    balance: Uint<64>
+}
+
+ledger users: Map<Bytes<32>, User>;
+ledger admin: Cell<Bytes<32>>;
+
+// Layer 1: Validation
+circuit is_admin(caller: Bytes<32>): Boolean {
+    const admin_id = admin.read();
+    return caller == admin_id;
+}
+
+circuit has_sufficient_balance(user_id: Bytes<32>, amount: Uint<64>): Boolean {
+    const user = users.lookup(user_id);
+    return if user is Maybe::Some(u) {
+        u.balance >= amount
+    } else {
+        false
+    };
+}
+
+// Layer 2: Business logic using validation
+circuit debit_user(user_id: Bytes<32>, amount: Uint<64>): [] {
+    assert has_sufficient_balance(user_id, amount), "Insufficient balance";
+
+    const user = users.lookup(user_id);
+    if user is Maybe::Some(u) {
+        const new_user = User {
+            id: u.id,
+            balance: u.balance - amount
+        };
+        users.insert(user_id, new_user);
+    }
+}
+
+// Layer 3: Public interface
+witness get_caller(): Bytes<32>;
+
+export circuit admin_withdraw(user_id: Bytes<32>, amount: Uint<64>): [] {
+    const caller = get_caller();
+    assert is_admin(disclose(caller)), "Only admin can withdraw";
+    debit_user(user_id, amount);
+}
+
+// ============================================
+// Ledger-Modifying Circuits
+// ============================================
+
+ledger counter: Counter;
+
+export circuit increment_counter(): Uint<64> {
+    counter.increment(1);
+    return counter.value();
+}
+
+export circuit increment_by(amount: Uint<64>): Uint<64> {
+    counter.increment(amount);
+    return counter.value();
+}

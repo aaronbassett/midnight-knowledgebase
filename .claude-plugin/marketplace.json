@@ -10,6 +10,100 @@
   "repository": "https://github.com/aaronbassett/midnight-expert.git",
   "license": "MIT",
   "keywords": [
-    "midnight network"
+    "midnight network",
+    "compact",
+    "smart contracts",
+    "zk-proofs",
+    "blockchain"
+  ],
+  "plugins": [
+    {
+      "name": "compact-core",
+      "source": "./plugins/compact-core"
+    },
+    {
+      "name": "compact-reviewer",
+      "source": "./plugins/compact-reviewer"
+    },
+    {
+      "source": "./plugins/midnight-core-concepts",
+      "name": "midnight-core-concepts",
+      "description": "Core concepts and patterns for Midnight Network development: UTXO/account models, zero-knowledge proofs, privacy patterns, smart contracts, and protocol architecture",
+      "version": "1.0.0",
+      "keywords": [
+        "midnight",
+        "blockchain",
+        "zero-knowledge",
+        "zk-proofs",
+        "privacy",
+        "smart-contracts",
+        "compact"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-tooling",
+      "name": "midnight-tooling",
+      "description": "Developer tooling for Midnight Network - environment setup, debugging, version management, and CI/CD workflows",
+      "version": "0.1.0",
+      "keywords": [
+        "midnight",
+        "blockchain",
+        "zero-knowledge",
+        "compact",
+        "smart-contracts",
+        "developer-tools"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-dapp",
+      "name": "midnight-dapp",
+      "description": "Frontend DApp development for Midnight Network. Wallet integration, zero-knowledge proof handling, state management, transaction flows, error handling, and testing patterns.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "dapp",
+        "frontend",
+        "wallet",
+        "lace",
+        "zero-knowledge",
+        "proofs",
+        "transactions",
+        "react",
+        "typescript",
+        "web3"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-proofs",
+      "name": "midnight-proofs",
+      "description": "Server-side ZK proof generation, verification, and optimization for Midnight Network. Offload proof computation from clients, implement proof caching, and optimize prover performance.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "zero-knowledge",
+        "proofs",
+        "prover",
+        "verification",
+        "server-side",
+        "performance",
+        "zk-snarks"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-indexer",
+      "name": "midnight-indexer",
+      "description": "Query blockchain data from Midnight Network. Transaction history, contract state, event subscriptions for building data-driven DApps.",
+      "version": "0.0.1",
+      "keywords": [
+        "midnight",
+        "indexer",
+        "blockchain",
+        "queries",
+        "events",
+        "subscriptions",
+        "graphql",
+        "websocket"
+      ]
+    }
   ]
 }

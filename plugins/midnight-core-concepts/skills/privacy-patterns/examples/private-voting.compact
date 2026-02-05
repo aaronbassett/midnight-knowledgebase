@@ -1,0 +1,126 @@
+// Private Voting System using Commitment/Nullifier Pattern
+
+import { persistentHash } from "std/compact/hashes";
+import { persistentCommit } from "std/compact/commitments";
+
+// =============================================================================
+// LEDGER STATE
+// =============================================================================
+
+ledger {
+  // Registered voters (public key hashes)
+  voters: MerkleTree<32, Bytes<32>>;
+
+  // Vote commitments (hides who voted for what)
+  votes: MerkleTree<32, Bytes<32>>;
+
+  // Nullifiers (prevents double voting)
+  nullifiers: Set<Bytes<32>>;
+
+  // Public vote counts
+  yes_count: Field;
+  no_count: Field;
+
+  // Voting state
+  voting_open: Boolean;
+}
+
+// =============================================================================
+// ADMIN: REGISTER VOTERS
+// =============================================================================
+
+export circuit registerVoter(voter_public_key: Bytes<32>): Void {
+  // Add voter's public key hash to authorized set
+  ledger.voters.insert(voter_public_key);
+}
+
+export circuit openVoting(): Void {
+  ledger.voting_open = true;
+}
+
+export circuit closeVoting(): Void {
+  ledger.voting_open = false;
+}
+
+// =============================================================================
+// VOTER: CAST VOTE (Private)
+// =============================================================================
+
+export witness castVote(
+  // Private inputs - never revealed
+  voter_private_key: Bytes<32>,     // Proves voter identity
+  voter_path: MerkleTreePath<32, Bytes<32>>,  // Proves registration
+  vote_choice: Field,               // 0 = no, 1 = yes
+  vote_randomness: Bytes<32>        // Makes commitment unique
+): Void {
+  // 1. Verify voting is open
+  assert ledger.voting_open == true;
+
+  // 2. Verify voter is registered (without revealing which voter)
+  const voter_public_key = persistentHash(voter_private_key);
+  assert ledger.voters.member(voter_public_key, voter_path);
+
+  // 3. Verify vote is valid (0 or 1)
+  assert vote_choice == 0 || vote_choice == 1;
+
+  // 4. Compute nullifier (prevents double voting)
+  // Unique per voter, unlinkable to identity
+  const nullifier = persistentHash(voter_private_key, "vote_nullifier");
+
+  // 5. Ensure voter hasn't voted before
+  assert !ledger.nullifiers.member(nullifier);
+  ledger.nullifiers.insert(nullifier);
+
+  // 6. Create vote commitment (hides the choice)
+  const vote_commitment = persistentCommit(vote_choice, vote_randomness);
+  ledger.votes.insert(vote_commitment);
+
+  // 7. Update tally (this is the key privacy trade-off)
+  // Observer sees counts change but not who voted
+  if vote_choice == 1 {
+    ledger.yes_count = ledger.yes_count + 1;
+  } else {
+    ledger.no_count = ledger.no_count + 1;
+  }
+}
+
+// =============================================================================
+// VERIFICATION: PROVE YOUR VOTE (Optional)
+// =============================================================================
+
+// Voter can optionally prove they voted a certain way
+// (useful for receipts or disputes)
+
+export witness proveMyVote(
+  vote_choice: Field,
+  vote_randomness: Bytes<32>,
+  vote_path: MerkleTreePath<32, Bytes<32>>
+): Void {
+  // Reconstruct the commitment
+  const vote_commitment = persistentCommit(vote_choice, vote_randomness);
+
+  // Prove it's in the votes tree
+  assert ledger.votes.member(vote_commitment, vote_path);
+
+  // This proves "I cast this vote" without revealing voter identity
+}
+
+// =============================================================================
+// PRIVACY ANALYSIS
+// =============================================================================
+
+// What's Private:
+// - Which registered voter cast which vote
+// - Link between voter identity and vote choice
+// - Whether a specific person has voted (only nullifier visible)
+
+// What's Public:
+// - Total registered voters (tree size)
+// - Total votes cast (yes_count + no_count)
+// - Current vote tallies
+// - That voting occurred
+
+// What's Proven (ZK):
+// - Voter is in authorized set
+// - Voter hasn't voted before
+// - Vote is valid (0 or 1)

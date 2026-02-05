@@ -1,0 +1,167 @@
+// Authentication Patterns - Prove Identity Without Revealing Secrets
+
+import { persistentHash } from "std/compact/hashes";
+
+// =============================================================================
+// PATTERN 1: SIMPLE KEY-BASED AUTH
+// =============================================================================
+
+ledger {
+  owner_key_hash: Bytes<32>;
+}
+
+// Setup: Store hash of owner's secret key
+export circuit setOwner(public_key_hash: Bytes<32>): Void {
+  ledger.owner_key_hash = public_key_hash;
+}
+
+// Auth: Prove ownership by demonstrating knowledge of preimage
+export witness ownerAction(
+  secret_key: Bytes<32>  // Never revealed
+): Void {
+  // ZK proof: "I know a key that hashes to the stored value"
+  assert persistentHash(secret_key) == ledger.owner_key_hash;
+
+  // If we reach here, caller is authorized
+  // ... perform owner-only action ...
+}
+
+// =============================================================================
+// PATTERN 2: MULTI-SIG AUTH (k-of-n)
+// =============================================================================
+
+ledger {
+  signers: MerkleTree<16, Bytes<32>>;  // Authorized signer key hashes
+  required_sigs: Field;
+  pending_action_hash: Bytes<32>;
+  current_sigs: Field;
+  used_signers: Set<Bytes<32>>;  // Prevent same signer twice
+}
+
+// Any authorized signer can approve
+export witness approveAction(
+  signer_secret: Bytes<32>,
+  signer_path: MerkleTreePath<16, Bytes<32>>
+): Void {
+  // Prove signer is authorized
+  const signer_hash = persistentHash(signer_secret);
+  assert ledger.signers.member(signer_hash, signer_path);
+
+  // Prevent double-signing
+  const signer_nullifier = persistentHash(signer_secret, ledger.pending_action_hash);
+  assert !ledger.used_signers.member(signer_nullifier);
+  ledger.used_signers.insert(signer_nullifier);
+
+  // Increment signature count
+  ledger.current_sigs = ledger.current_sigs + 1;
+}
+
+// Execute when enough signatures collected
+export circuit executeAction(): Void {
+  assert ledger.current_sigs >= ledger.required_sigs;
+  // ... execute the action ...
+}
+
+// =============================================================================
+// PATTERN 3: ROLE-BASED AUTH
+// =============================================================================
+
+ledger {
+  admins: MerkleTree<16, Bytes<32>>;
+  operators: MerkleTree<16, Bytes<32>>;
+  users: MerkleTree<20, Bytes<32>>;
+}
+
+// Admin-only action
+export witness adminAction(
+  admin_secret: Bytes<32>,
+  admin_path: MerkleTreePath<16, Bytes<32>>
+): Void {
+  const admin_hash = persistentHash(admin_secret);
+  assert ledger.admins.member(admin_hash, admin_path);
+  // ... admin action ...
+}
+
+// Operator-only action
+export witness operatorAction(
+  operator_secret: Bytes<32>,
+  operator_path: MerkleTreePath<16, Bytes<32>>
+): Void {
+  const operator_hash = persistentHash(operator_secret);
+  assert ledger.operators.member(operator_hash, operator_path);
+  // ... operator action ...
+}
+
+// User action (anyone registered)
+export witness userAction(
+  user_secret: Bytes<32>,
+  user_path: MerkleTreePath<20, Bytes<32>>
+): Void {
+  const user_hash = persistentHash(user_secret);
+  assert ledger.users.member(user_hash, user_path);
+  // ... user action ...
+}
+
+// =============================================================================
+// PATTERN 4: TIME-LOCKED AUTH
+// =============================================================================
+
+ledger {
+  owner_hash: Bytes<32>;
+  recovery_hash: Bytes<32>;
+  last_owner_action: Field;  // Timestamp
+  recovery_delay: Field;     // Required delay for recovery
+}
+
+// Normal owner action (resets timer)
+export witness ownerWithTimer(
+  owner_secret: Bytes<32>,
+  current_time: Field
+): Void {
+  assert persistentHash(owner_secret) == ledger.owner_hash;
+  ledger.last_owner_action = current_time;
+  // ... action ...
+}
+
+// Recovery action (only if owner inactive)
+export witness recoveryAction(
+  recovery_secret: Bytes<32>,
+  current_time: Field,
+  new_owner_hash: Bytes<32>
+): Void {
+  assert persistentHash(recovery_secret) == ledger.recovery_hash;
+
+  // Only allowed after delay
+  assert current_time >= ledger.last_owner_action + ledger.recovery_delay;
+
+  // Transfer ownership
+  ledger.owner_hash = new_owner_hash;
+}
+
+// =============================================================================
+// PATTERN 5: DELEGATED AUTH
+// =============================================================================
+
+ledger {
+  primary_owner: Bytes<32>;
+  delegates: MerkleTree<16, Bytes<32>>;
+  delegate_permissions: Map<Bytes<32>, Field>;  // Permission bitmap
+}
+
+// Owner can delegate specific permissions
+export witness delegatedAction(
+  delegate_secret: Bytes<32>,
+  delegate_path: MerkleTreePath<16, Bytes<32>>,
+  required_permission: Field
+): Void {
+  const delegate_hash = persistentHash(delegate_secret);
+
+  // Prove delegate is authorized
+  assert ledger.delegates.member(delegate_hash, delegate_path);
+
+  // Check specific permission
+  // (In practice, use bitwise ops for permission checking)
+  // ... permission check logic ...
+
+  // ... delegated action ...
+}

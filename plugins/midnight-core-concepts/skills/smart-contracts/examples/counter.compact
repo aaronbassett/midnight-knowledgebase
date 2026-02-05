@@ -1,0 +1,22 @@
+// Minimal Counter Contract
+// Demonstrates basic Compact structure
+
+ledger {
+  count: Field;
+}
+
+// Public entry point - anyone can call
+export circuit increment(): Void {
+  ledger.count = ledger.count + 1;
+}
+
+// Public entry point with parameter
+export circuit incrementBy(amount: Field): Void {
+  assert amount > 0;  // Validation
+  ledger.count = ledger.count + amount;
+}
+
+// Read current count (actually happens off-chain)
+export circuit getCount(): Field {
+  return ledger.count;
+}
