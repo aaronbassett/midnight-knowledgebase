@@ -10,8 +10,5 @@
     "smart-contracts",
     "zk-circuits",
     "privacy"
-  ],
-  "dependencies": [
-    "compact-core"
   ]
 }

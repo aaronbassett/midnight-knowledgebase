@@ -19,14 +19,40 @@
   "plugins": [
     {
       "name": "compact-core",
-      "path": "./compact-core",
-      "description": "Comprehensive Compact language knowledge base covering syntax, types, privacy model, ledger ADTs, and standard library"
+      "source": "./plugins/compact-core"
     },
     {
       "name": "compact-reviewer",
-      "path": "./compact-reviewer",
-      "description": "Deep-dive code reviews for Compact smart contracts across 8 dimensions: security, critical issues, performance, architecture, best practices, code quality, testing, and maintainability",
-      "dependencies": ["compact-core"]
+      "source": "./plugins/compact-reviewer"
+    },
+    {
+      "source": "./plugins/midnight-core-concepts",
+      "name": "midnight-core-concepts",
+      "description": "Core concepts and patterns for Midnight Network development: UTXO/account models, zero-knowledge proofs, privacy patterns, smart contracts, and protocol architecture",
+      "version": "1.0.0",
+      "keywords": [
+        "midnight",
+        "blockchain",
+        "zero-knowledge",
+        "zk-proofs",
+        "privacy",
+        "smart-contracts",
+        "compact"
+      ]
+    },
+    {
+      "source": "./plugins/midnight-tooling",
+      "name": "midnight-tooling",
+      "description": "Developer tooling for Midnight Network - environment setup, debugging, version management, and CI/CD workflows",
+      "version": "0.1.0",
+      "keywords": [
+        "midnight",
+        "blockchain",
+        "zero-knowledge",
+        "compact",
+        "smart-contracts",
+        "developer-tools"
+      ]
     }
   ]
 }
