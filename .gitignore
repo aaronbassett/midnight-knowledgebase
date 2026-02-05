@@ -32,6 +32,11 @@ __pycache__/
 # Claude Code
 .claude/
 
+# SDD artifacts
+.sdd/
+specs/
+discovery/
+
 # Generated reviews
 reviews/
 
