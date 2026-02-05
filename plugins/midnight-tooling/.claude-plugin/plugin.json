@@ -1,6 +1,6 @@
 {
   "name": "midnight-tooling",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Developer tooling for Midnight Network - environment setup, debugging, version management, and CI/CD workflows",
   "author": {
     "name": "Midnight",

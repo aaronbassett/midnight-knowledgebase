@@ -1,6 +1,6 @@
 {
   "name": "midnight-expert",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Plugins and skills to turn AI coding assistants into Midnight Network experts",
   "owner": {
     "name": "Aaron Bassett",
@@ -103,6 +103,20 @@
         "subscriptions",
         "graphql",
         "websocket"
+      ]
+    },
+    {
+      "source": "./plugins/dapp-sdd",
+      "name": "dapp-sdd",
+      "description": "Streamlined specification-driven development for Midnight Network example dApps. PR-centric workflow with autonomous implementation and mandatory code reviews.",
+      "version": "0.1.0",
+      "keywords": [
+        "midnight",
+        "dapp",
+        "sdd",
+        "compact",
+        "example",
+        "autonomous"
       ]
     }
   ]
