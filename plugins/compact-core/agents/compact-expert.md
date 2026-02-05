@@ -1,6 +1,8 @@
 ---
 name: compact-expert
 description: Deep Compact language expertise for open-ended questions and edge cases. Use when queries don't match specific skills, for architecture guidance, pattern composition, or advanced Compact development questions.
+model: inherit
+color: blue
 tools:
   - Read
   - Glob

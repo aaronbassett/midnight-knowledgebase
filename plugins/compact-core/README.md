@@ -24,6 +24,7 @@ This Claude Code plugin provides comprehensive guidance for writing privacy-pres
 | `typescript-integration` | TypeScript bridge, witness implementation | "witness implementation", "type mapping" |
 | `contract-patterns` | 10+ simple patterns, 3 deep-dives | "contract pattern", "voting", "escrow" |
 | `compilation-tooling` | Compiler usage, project structure | "compactc", "COMPACT_PATH" |
+| `clone-examples` | Example contracts, project scaffolding | "example", "starter", "scaffold" |
 
 ## Commands
 
@@ -44,7 +45,7 @@ This Claude Code plugin provides comprehensive guidance for writing privacy-pres
 
 ## Content Inventory
 
-- **Skills**: 8 specialized skill directories
+- **Skills**: 9 specialized skill directories
 - **Reference Documents**: 29 detailed guides
 - **Compact Examples**: 30 working contract examples
 - **Simple Patterns**: 10 focused contract patterns

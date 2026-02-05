@@ -218,7 +218,9 @@ async function shutdown(): Promise<void> {
   console.log('Shutting down worker...');
 
   // Close worker (waits for active jobs)
-  await worker.close();
+  if (worker) {
+    await worker.close();
+  }
 
   // Close prover
   await prover.close();

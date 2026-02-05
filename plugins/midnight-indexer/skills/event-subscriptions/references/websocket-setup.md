@@ -72,7 +72,7 @@ HTTP:      https://indexer.midnight.network/api/v1/graphql
 
 ### graphql-ws Protocol
 
-The indexer uses the `graphql-ws` protocol (previously known as `subscriptions-transport-ws`). This is the standard protocol for GraphQL subscriptions.
+The indexer uses the `graphql-ws` protocol, the modern standard for GraphQL subscriptions. Note: `graphql-ws` is a distinct library that replaced the older, now-deprecated `subscriptions-transport-ws` — they use incompatible wire protocols and are not interchangeable.
 
 **Message Types:**
 

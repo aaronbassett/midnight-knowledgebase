@@ -281,7 +281,7 @@ def check_path_contains_compact() -> DiagnosticResult:
                 message=f"Compact found at {found_at} but not in PATH",
                 fix_available=True,
                 fix_description=f"Add {found_at} to your PATH",
-                fix_command=f'echo \'export PATH="{found_at}:$PATH"\' >> ~/.zshrc && source ~/.zshrc',
+                fix_command=f'echo \'export PATH="{found_at}:$PATH"\' >> ~/.{os.path.basename(os.environ.get("SHELL", "/bin/zsh"))}rc && source ~/.{os.path.basename(os.environ.get("SHELL", "/bin/zsh"))}rc',
                 details={"found_at": str(found_at)}
             )
 

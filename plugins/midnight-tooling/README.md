@@ -10,6 +10,9 @@ A Claude Code plugin for developers building on the Midnight Network. Provides e
 - **midnight-debugging** - Expert knowledge for identifying and fixing common toolchain issues
 - **midnight-compatibility** - Version compatibility matrix and pragma requirements
 - **midnight-ci** - CI/CD setup guidance with GitHub workflow templates
+- **contract-calling** - Calling deployed contracts from Node.js, querying state, executing transactions
+- **contract-deployment** - Deploying Compact contracts to testnet/mainnet, configuring network endpoints
+- **lifecycle-management** - Managing deployed contract lifecycles, state backup, migrations, versioning
 
 ### Commands
 
@@ -65,7 +68,6 @@ This plugin covers:
 
 This plugin does **not** cover:
 - Running a Midnight node
-- Network operations or deployment
 
 ## Documentation
 
@@ -104,11 +106,14 @@ midnight-tooling/
 ├── .claude-plugin/plugin.json    # Plugin manifest
 ├── commands/                      # 5 slash commands
 ├── agents/                        # 1 debugging agent
-├── skills/                        # 4 skills with references
+├── skills/                        # 7 skills with references
 │   ├── midnight-setup/
 │   ├── midnight-debugging/
 │   ├── midnight-compatibility/
-│   └── midnight-ci/
+│   ├── midnight-ci/
+│   ├── contract-calling/
+│   ├── contract-deployment/
+│   └── lifecycle-management/
 └── scripts/                       # Utility scripts
 ```
 

@@ -1,10 +1,8 @@
 ---
 name: compact-lint
 description: Validate Compact code patterns and suggest improvements
-allowed_tools:
-  - Read
-  - Glob
-  - Grep
+allowed-tools: Read, Glob, Grep
+argument-hint: "[file_path]"
 ---
 
 # /compact-lint

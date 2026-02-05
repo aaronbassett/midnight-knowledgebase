@@ -1,5 +1,7 @@
 // Common ZK Circuit Patterns in Compact
 
+import CompactStandardLibrary;  // persistentHash, persistentCommit
+
 // =============================================================================
 // PATTERN 1: PROVE KNOWLEDGE WITHOUT REVEALING
 // =============================================================================

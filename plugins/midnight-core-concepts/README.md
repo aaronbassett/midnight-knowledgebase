@@ -26,6 +26,14 @@ Each skill contains:
 - `references/` - Detailed technical documentation
 - `examples/` - Compact code examples
 
+## Usage Examples
+
+```
+"Explain how Midnight's UTXO model differs from account-based blockchains"
+"What are the roles of prover and verifier in Midnight's ZK system?"
+"How does the Kachina protocol handle private contract state?"
+```
+
 ## Installation
 
 ```bash

@@ -2,7 +2,7 @@
 name: dapp-sdd:clarify
 description: Fetch answers from PR comments and continue the implementation pipeline
 argument-hint: --continue
-allowed_tools: Bash, Read, Write, Edit, Glob, Grep, Skill, Task
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Skill, Task
 ---
 
 # /dapp-sdd:clarify

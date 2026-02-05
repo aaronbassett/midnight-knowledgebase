@@ -60,6 +60,7 @@ export class ProverWorkerPool extends EventEmitter {
   private totalProofs = 0;
   private totalErrors = 0;
   private totalDuration = 0;
+  private healthMonitorInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: Partial<PoolConfig> = {}) {
     super();
@@ -297,7 +298,7 @@ export class ProverWorkerPool extends EventEmitter {
    * Start health monitoring
    */
   private startHealthMonitor(): void {
-    setInterval(() => {
+    this.healthMonitorInterval = setInterval(() => {
       this.checkWorkerHealth();
       this.checkMemoryPressure();
       this.checkScaling();
@@ -392,6 +393,11 @@ export class ProverWorkerPool extends EventEmitter {
   async shutdown(): Promise<void> {
     console.log('Shutting down worker pool...');
     this.shuttingDown = true;
+
+    if (this.healthMonitorInterval) {
+      clearInterval(this.healthMonitorInterval);
+      this.healthMonitorInterval = null;
+    }
 
     // Reject queued tasks
     const queuedTasks = this.taskQueue.splice(0);

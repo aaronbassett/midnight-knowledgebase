@@ -147,8 +147,8 @@ def count_operations(body: str) -> Dict[str, int]:
         ops['merkle_proofs'] += len(merkle_matches)
         ops['merkle_depth'] = max(int(d) for d in merkle_matches)
 
-    # Comparisons
-    ops['inequality_comparisons'] += len(re.findall(r'[<>]=?', body))
+    # Comparisons (exclude type annotations like Uint<64>, Vector<10>)
+    ops['inequality_comparisons'] += len(re.findall(r'(?<!\w<)(?<!\w)[<>]=?(?!\d+>)', body))
     ops['equality_comparisons'] += len(re.findall(r'==', body))
 
     # Loops - try to extract iteration count
@@ -156,8 +156,8 @@ def count_operations(body: str) -> Dict[str, int]:
     for start, end in loop_matches:
         ops['loop_iterations'] += int(end) - int(start)
 
-    # Collection accesses
-    ops['collection_accesses'] += len(re.findall(r'\[\w+\]', body))
+    # Collection accesses (exclude type declarations like Vector<N>[T])
+    ops['collection_accesses'] += len(re.findall(r'(?<!<\d)(?<![A-Z])\[\w+\]', body))
 
     return ops
 

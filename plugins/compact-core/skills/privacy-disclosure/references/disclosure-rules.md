@@ -154,20 +154,7 @@ witness get_value(): Field;
 
 export circuit safe_assert(): [] {
     const value = get_value();
-    assert value > 0;  // OK: assertion doesn't return the value
-    // The proof simply fails if assertion is false
-}
-```
-
-Wait - this is actually tricky! Let me reconsider:
-
-```compact
-// Actually, comparisons ARE disclosure triggers even in assertions
-witness get_value(): Field;
-
-export circuit correct_assert(): [] {
-    const value = get_value();
-    assert disclose(value) > 0;  // Comparison requires disclosure
+    assert disclose(value) > 0;  // Comparison requires disclosure even in assertions
 }
 ```
 
