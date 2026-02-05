@@ -1,7 +1,6 @@
 ---
-name: Midnight Debugging
-description: This skill should be used when the user encounters Midnight-related errors such as "compact: command not found", "ERR_UNSUPPORTED_DIR_IMPORT", version mismatch errors, proof server connection failures, "@midnight-ntwrk" package errors, compilation failures, or asks to "debug Midnight", "fix Midnight error", "troubleshoot Midnight", or mentions problems with the Midnight development environment.
-version: 0.1.0
+name: midnight-tooling:midnight-debugging
+description: Use when encountering Midnight errors like "compact: command not found", "ERR_UNSUPPORTED_DIR_IMPORT", version mismatches, proof server failures, "@midnight-ntwrk" package errors, or compilation failures.
 ---
 
 # Midnight Environment Debugging

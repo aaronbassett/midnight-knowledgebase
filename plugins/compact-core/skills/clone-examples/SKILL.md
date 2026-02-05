@@ -1,21 +1,11 @@
+---
+name: compact-core:clone-examples
+description: Use when starting a new Midnight project, cloning example contracts (counter, tokens, NFTs, DEX), scaffolding from OpenZeppelin templates, or bootstrapping a Compact contract development environment with working starter code.
+---
+
 # Clone Examples
 
 > Catalog of cloneable Compact contract examples and starter projects
-
-## Metadata
-
-- **Name**: clone-examples
-- **Version**: 1.0.0
-- **Category**: Reference
-- **Tags**: examples, templates, starters, clone, scaffold
-
-## Triggers
-
-Activate when users mention:
-- "clone example", "starter template", "example project"
-- "get started with", "scaffold", "bootstrap"
-- "OpenZeppelin contracts", "midnight examples"
-- Specific project types: "token", "NFT", "counter", "DEX", "kitties"
 
 ## Usage
 

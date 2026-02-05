@@ -1,6 +1,6 @@
 ---
-name: state-management
-description: Read and sync contract state in Midnight DApps
+name: midnight-dapp:state-management
+description: Use when reading public ledger state, implementing reactive UI that updates with chain state, caching state for performance, or understanding public vs private state in Midnight DApps.
 ---
 
 # State Management

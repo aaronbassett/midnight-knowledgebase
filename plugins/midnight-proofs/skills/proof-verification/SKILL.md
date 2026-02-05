@@ -1,7 +1,6 @@
 ---
-name: Proof Verification
-description: This skill should be used when the user asks to "verify proof", "validate proof before submit", "batch verify proofs", "check proof validity", "proof verification service", or mentions verifying ZK proofs server-side. Provides guidance for proof verification in backend services.
-version: 0.1.0
+name: midnight-proofs:proof-verification
+description: Use when verifying ZK proofs server-side, validating proofs before transaction submission, building verification gateways, implementing batch verification, or debugging proof generation issues.
 ---
 
 # Proof Verification

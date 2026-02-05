@@ -1,7 +1,6 @@
 ---
-name: Midnight Setup
-description: This skill should be used when the user asks to "set up Midnight", "install Midnight tools", "install Compact compiler", "install Compact developer tools", "configure Midnight environment", "set up proof server", "Midnight prerequisites", "get started with Midnight development", or mentions setting up a local Midnight development environment.
-version: 0.1.0
+name: midnight-tooling:midnight-setup
+description: Use when setting up Midnight development environment, installing Compact compiler and developer tools, configuring proof server, verifying prerequisites, or getting started with Midnight development.
 ---
 
 # Midnight Development Environment Setup

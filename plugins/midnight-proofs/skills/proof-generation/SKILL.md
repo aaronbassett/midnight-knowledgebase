@@ -1,7 +1,6 @@
 ---
-name: Proof Generation
-description: This skill should be used when the user asks to "generate proof server-side", "proof generation service", "offload proof computation", "create prover API", "proof worker", or mentions building backend services for ZK proof creation. Provides guidance for server-side proof generation in Midnight.
-version: 0.1.0
+name: midnight-proofs:proof-generation
+description: Use when generating ZK proofs server-side, building proof-as-a-service backends, offloading proof computation from clients, creating proof generation queues, or implementing async proof generation.
 ---
 
 # Proof Generation

@@ -1,6 +1,6 @@
 ---
-name: security-review
-description: Security vulnerability detection for Compact smart contracts including ZK-specific attack vectors, disclosure violations, and access control issues
+name: compact-reviewer:security-review
+description: Use when reviewing Compact contracts for security vulnerabilities, privacy leaks, disclosure violations, access control issues, or ZK-specific attack vectors.
 ---
 
 # Security Review Skill

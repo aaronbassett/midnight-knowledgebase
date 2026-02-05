@@ -1,6 +1,6 @@
 ---
-name: testing-patterns
-description: Test Midnight DApps without real proofs
+name: midnight-dapp:testing-patterns
+description: Use when writing unit tests for Midnight contract interaction code, integration testing without ZK proofs, E2E testing with Playwright or Cypress, or setting up CI/CD pipelines for Midnight DApps.
 ---
 
 # Testing Patterns

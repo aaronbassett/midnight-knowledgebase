@@ -1,25 +1,11 @@
-# Contract Patterns Skill
+---
+name: compact-core:contract-patterns
+description: Use when implementing common Compact contract patterns such as voting systems, escrow, token transfers, access control, auctions, registries, or when looking for reusable contract templates and design patterns for Midnight blockchain development.
+---
+
+# Contract Patterns
 
 > Reusable Compact contract patterns and best practices for Midnight development
-
-## Metadata
-
-- **Name**: contract-patterns
-- **Version**: 1.0.0
-- **Category**: Development Patterns
-- **Tags**: compact, patterns, examples, contracts, best-practices
-
-## Triggers
-
-Activate this skill when users mention:
-- "contract pattern", "design pattern", "pattern"
-- "example", "sample", "template"
-- "voting", "election", "ballot"
-- "escrow", "multi-party", "custody"
-- "token", "transfer", "balance"
-- "access control", "permission", "role"
-- "auction", "bidding"
-- "registry", "membership", "whitelist"
 
 ## Overview
 

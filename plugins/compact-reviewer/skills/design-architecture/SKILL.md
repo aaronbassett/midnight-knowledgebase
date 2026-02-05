@@ -1,6 +1,6 @@
 ---
-name: design-architecture
-description: Contract structure and design pattern evaluation for Compact smart contracts including modularity, pattern recognition, and architectural best practices
+name: compact-reviewer:design-architecture
+description: Use when reviewing Compact contract architecture, evaluating design patterns, assessing modularity, or analyzing API design and code organization quality.
 ---
 
 # Design & Architecture Skill

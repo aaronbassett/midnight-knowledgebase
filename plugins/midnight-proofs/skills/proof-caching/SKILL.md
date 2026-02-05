@@ -1,7 +1,6 @@
 ---
-name: Proof Caching
-description: This skill should be used when the user asks to "cache proofs", "proof caching strategy", "reuse proof components", "proof cache invalidation", "cache proof results", or mentions caching ZK proofs for performance. Provides guidance for implementing proof caching in backend services.
-version: 0.1.0
+name: midnight-proofs:proof-caching
+description: Use when caching ZK proofs for performance, implementing proof cache invalidation, storing verification results, caching intermediate proof components, or building distributed proof caches with Redis.
 ---
 
 # Proof Caching

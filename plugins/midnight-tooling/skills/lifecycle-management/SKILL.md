@@ -1,7 +1,6 @@
 ---
-name: Lifecycle Management
-description: This skill should be used when the user asks to "manage contract state", "upgrade contract", "migrate contract", "backup contract state", "contract versioning", "deprecate contract", "inspect contract state", or mentions managing deployed contract lifecycles on Midnight.
-version: 0.1.0
+name: midnight-tooling:lifecycle-management
+description: Use when managing deployed contract lifecycles, inspecting contract state, backing up state before upgrades, planning contract migrations, implementing versioning strategies, or deprecating contracts gracefully.
 ---
 
 # Contract Lifecycle Management

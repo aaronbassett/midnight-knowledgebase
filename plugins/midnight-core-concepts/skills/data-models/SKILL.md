@@ -1,6 +1,6 @@
 ---
-name: Midnight Data Models
-description: This skill should be used when the user asks about "UTXO", "account model", "ledger", "tokens", "shielded", "unshielded", "nullifier", "coin", "balance", or needs to choose between UTXO-based and account-based token models in Midnight. Covers Midnight's dual-token paradigm, ledger types, and state management.
+name: midnight-core-concepts:data-models
+description: Use when asking about UTXO vs account models, ledger tokens, shielded/unshielded tokens, nullifiers, coins, balances, or choosing between token paradigms in Midnight.
 ---
 
 # Midnight Data Models

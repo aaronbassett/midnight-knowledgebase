@@ -1,6 +1,6 @@
 ---
-name: Midnight Privacy Patterns
-description: This skill should be used when the user asks about "privacy", "private data", "commitment", "hash", "Merkle tree", "nullifier pattern", "shielded", "keeping data private", or needs to implement privacy-preserving logic in Compact contracts. Covers hashes, commitments, Merkle trees, and the commitment/nullifier pattern.
+name: midnight-core-concepts:privacy-patterns
+description: Use when implementing privacy-preserving logic in Compact, working with hashes, commitments, Merkle trees, nullifier patterns, or keeping data private on-chain.
 ---
 
 # Privacy Patterns in Midnight

@@ -1,6 +1,6 @@
 ---
-name: performance-review
-description: Circuit efficiency analysis for Compact smart contracts including constraint estimation, optimization opportunities, and proof generation performance
+name: compact-reviewer:performance-review
+description: Use when reviewing Compact circuits for performance issues, optimizing constraint counts, analyzing proof generation time, or identifying gas and cost optimization opportunities.
 ---
 
 # Performance Review Skill

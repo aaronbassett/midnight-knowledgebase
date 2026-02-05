@@ -1,6 +1,6 @@
 ---
-name: ledger-adts
-description: Complete reference for Compact ledger abstract data types - Counter, Map, Set, List, MerkleTree, and more
+name: compact-core:ledger-adts
+description: Use when working with Compact on-chain state management using ledger ADTs including Cell, Counter, Map, Set, List, MerkleTree, or HistoricMerkleTree, or when needing to understand which operations are available in Compact vs TypeScript.
 ---
 
 # Ledger ADTs

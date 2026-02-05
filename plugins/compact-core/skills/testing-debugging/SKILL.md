@@ -1,14 +1,6 @@
 ---
-name: testing-debugging
-description: Testing strategies, debugging techniques, and common error solutions for Compact smart contracts
-triggers:
-  - test
-  - debug
-  - error
-  - assert failed
-  - circuit constraint
-  - proof failed
-  - compile error
+name: compact-core:testing-debugging
+description: Use when testing Compact contracts, debugging compile errors, understanding error messages like "potential witness-value disclosure" or "circuit constraint failed", setting up TypeScript test harnesses, or mocking witness functions for unit tests.
 ---
 
 # Testing & Debugging

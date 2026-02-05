@@ -1,7 +1,6 @@
 ---
-name: Contract Deployment
-description: This skill should be used when the user asks to "deploy a contract", "deploy to testnet", "deploy to mainnet", "publish a Compact contract", "configure deployment", or mentions deploying smart contracts to Midnight network.
-version: 0.1.0
+name: midnight-tooling:contract-deployment
+description: Use when deploying Compact contracts to Midnight testnet or mainnet, configuring network endpoints, handling deployment confirmation, troubleshooting failed deployments, or setting up deployment scripts for CI/CD.
 ---
 
 # Contract Deployment

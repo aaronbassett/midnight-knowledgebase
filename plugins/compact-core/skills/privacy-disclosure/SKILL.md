@@ -1,6 +1,6 @@
 ---
-name: privacy-disclosure
-description: Disclosure rules, commitment patterns, and privacy best practices for Compact smart contracts
+name: compact-core:privacy-disclosure
+description: Use when encountering "potential witness-value disclosure" compiler errors, implementing commit-reveal patterns, working with persistentCommit/transientCommit vs persistentHash/transientHash, or designing privacy-preserving circuits with proper witness protection.
 ---
 
 # Privacy & Disclosure

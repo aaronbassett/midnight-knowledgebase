@@ -1,7 +1,6 @@
 ---
-name: Contract Calling
-description: This skill should be used when the user asks to "call a contract", "invoke contract method", "query contract state", "send transaction to contract", "interact with deployed contract", "read contract data", or mentions invoking circuits on deployed Midnight contracts.
-version: 0.1.0
+name: midnight-tooling:contract-calling
+description: Use when calling deployed Midnight contracts from Node.js backends, querying contract state, executing state-changing transactions, building API endpoints that interact with contracts, or automating contract interactions.
 ---
 
 # Contract Calling

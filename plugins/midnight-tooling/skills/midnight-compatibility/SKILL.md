@@ -1,7 +1,6 @@
 ---
-name: Midnight Compatibility
-description: This skill should be used when the user asks about "Midnight version compatibility", "which versions work together", "pragma language_version", "Compact runtime version", "compiler version compatibility", "support matrix", or needs to understand how different Midnight component versions relate to each other.
-version: 0.1.0
+name: midnight-tooling:midnight-compatibility
+description: Use when checking Midnight version compatibility, understanding pragma language_version, verifying compiler and runtime version relationships, or troubleshooting version mismatch errors between Midnight components.
 ---
 
 # Midnight Version Compatibility

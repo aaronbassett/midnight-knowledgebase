@@ -1,6 +1,6 @@
 ---
-name: Midnight Protocols
-description: This skill should be used when the user asks about "Kachina", "Zswap", "atomic swap", "token transfer", "shielded transfer", "offer", "coin", "private transaction", or needs to understand Midnight's core protocols. Covers Kachina smart contract protocol and Zswap token transfer mechanism.
+name: midnight-core-concepts:protocols
+description: Use when asking about Kachina smart contract protocol, Zswap token transfers, atomic swaps, shielded transfers, offers, coins, or private transaction mechanisms in Midnight.
 ---
 
 # Midnight Protocols
