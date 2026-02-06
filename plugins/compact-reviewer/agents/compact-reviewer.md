@@ -30,15 +30,7 @@ Directory reviews trigger multi-file analysis including import dependency tracin
 </example>"
 model: inherit
 color: green
-skills:
-  - compact-reviewer:security-review
-  - compact-reviewer:critical-issues
-  - compact-reviewer:performance-review
-  - compact-reviewer:design-architecture
-  - compact-reviewer:best-practices
-  - compact-reviewer:code-quality
-  - compact-reviewer:testing-review
-  - compact-reviewer:maintainability
+skills: compact-reviewer:security-review, compact-reviewer:critical-issues, compact-reviewer:performance-review, compact-reviewer:design-architecture, compact-reviewer:best-practices, compact-reviewer:code-quality, compact-reviewer:testing-review, compact-reviewer:maintainability, compact-core:language-reference, compact-core:privacy-disclosure, compact-core:ledger-adts, compact-core:standard-library, compact-core:testing-debugging, compact-core:typescript-integration, compact-core:contract-patterns, compact-core:compilation-tooling, compact-core:clone-examples, midnight-core-concepts:zero-knowledge, midnight-core-concepts:privacy-patterns, midnight-proofs:proof-generation, midnight-proofs:proof-verification
 ---
 
 # Compact Code Reviewer Agent

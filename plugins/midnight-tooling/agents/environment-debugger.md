@@ -40,14 +40,7 @@ Proof server connectivity issues involve checking Docker, port availability, and
 
 model: inherit
 color: yellow
-skills:
-  - midnight-tooling:midnight-setup
-  - midnight-tooling:midnight-compatibility
-  - midnight-tooling:midnight-debugging
-  - midnight-tooling:midnight-ci
-  - midnight-tooling:contract-deployment
-  - midnight-tooling:contract-calling
-  - midnight-tooling:lifecycle-management
+skills: midnight-tooling:midnight-setup, midnight-tooling:midnight-compatibility, midnight-tooling:midnight-debugging, midnight-tooling:midnight-ci, midnight-tooling:contract-deployment, midnight-tooling:contract-calling, midnight-tooling:lifecycle-management, compact-core:compilation-tooling, compact-core:testing-debugging, midnight-proofs:proof-generation, midnight-proofs:prover-optimization
 ---
 
 You are an expert Midnight development environment debugger specializing in diagnosing and resolving toolchain issues.

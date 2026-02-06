@@ -39,13 +39,7 @@ Migration questions from other Web3 platforms are common. The agent provides fam
 </example>"
 model: inherit
 color: magenta
-skills:
-  - midnight-dapp:wallet-integration
-  - midnight-dapp:proof-handling
-  - midnight-dapp:state-management
-  - midnight-dapp:transaction-flows
-  - midnight-dapp:error-handling
-  - midnight-dapp:testing-patterns
+skills: midnight-dapp:wallet-integration, midnight-dapp:proof-handling, midnight-dapp:state-management, midnight-dapp:transaction-flows, midnight-dapp:error-handling, midnight-dapp:testing-patterns, midnight-core-concepts:architecture, midnight-core-concepts:zero-knowledge, midnight-core-concepts:privacy-patterns, midnight-core-concepts:smart-contracts, midnight-core-concepts:data-models, midnight-core-concepts:protocols, compact-core:typescript-integration, midnight-indexer:indexer-service, midnight-indexer:event-subscriptions, midnight-tooling:contract-deployment, midnight-tooling:contract-calling
 ---
 
 # DApp Architect Agent
