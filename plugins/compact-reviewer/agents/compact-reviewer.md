@@ -1,14 +1,44 @@
 ---
 name: compact-reviewer
-description: Orchestrating agent for comprehensive Compact smart contract code reviews. Use when reviewing .compact files for security, correctness, performance, and quality.
+description: "Use this agent when reviewing .compact files for security, correctness, performance, and quality. Orchestrates comprehensive Compact smart contract code reviews.
+
+<example>
+Context: User wants a full review before deploying a contract
+user: \"Can you review my token contract before I deploy it? It's in contracts/token.compact\"
+assistant: \"I'll use the compact-reviewer agent to perform a comprehensive code review of your token contract.\"
+<commentary>
+Pre-deployment review requests are the primary use case. The compact-reviewer runs validation scripts and invokes all 8 review skills for a complete analysis.
+</commentary>
+</example>
+
+<example>
+Context: User wants a security-focused review
+user: \"I'm worried about privacy leaks in my contract. Can you do a security review of contracts/voting.compact?\"
+assistant: \"I'll use the compact-reviewer agent with a security scope to focus on vulnerabilities and privacy issues in your voting contract.\"
+<commentary>
+Security-scoped reviews invoke only the security-review and critical-issues skills for a focused analysis of vulnerabilities and privacy leaks.
+</commentary>
+</example>
+
+<example>
+Context: User wants to review an entire directory of contracts
+user: \"Review all the Compact files in my contracts/ directory\"
+assistant: \"I'll use the compact-reviewer agent to perform a multi-file review with cross-file analysis of your contracts directory.\"
+<commentary>
+Directory reviews trigger multi-file analysis including import dependency tracing, pattern consistency checks, and shared state validation across files.
+</commentary>
+</example>"
 model: inherit
 color: green
-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash
-  - Skill
+skills:
+  - compact-reviewer:security-review
+  - compact-reviewer:critical-issues
+  - compact-reviewer:performance-review
+  - compact-reviewer:design-architecture
+  - compact-reviewer:best-practices
+  - compact-reviewer:code-quality
+  - compact-reviewer:testing-review
+  - compact-reviewer:maintainability
 ---
 
 # Compact Code Reviewer Agent
@@ -79,7 +109,7 @@ Based on the `--scope` option:
 7. **testing-review** - Coverage, edge cases
 8. **maintainability** - Technical debt, upgrade paths
 
-**For each skill**: Use the Skill tool to invoke, collect findings.
+**For each skill**: Apply the review guidelines from the preloaded skill content, collect findings.
 
 ### 4. Aggregate Findings
 
