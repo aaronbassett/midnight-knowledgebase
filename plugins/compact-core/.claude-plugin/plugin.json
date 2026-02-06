@@ -1,6 +1,6 @@
 {
   "name": "compact-core",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Expert-level Compact smart contract development for Midnight Network. Complete language reference, privacy patterns, ledger ADTs, standard library, testing, TypeScript integration, and proven contract patterns.",
   "author": {
     "name": "Midnight Knowledgebase"
