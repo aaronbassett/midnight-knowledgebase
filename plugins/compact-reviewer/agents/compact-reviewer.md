@@ -83,25 +83,43 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/analyze-complexity.py <file>
 
 ### 3. Invoke Review Skills
 
+**IMPORTANT: All review skills and reference skills listed below are preloaded into your context. Do not search externally for Compact language rules, privacy patterns, ZK constraints, or code quality standards — consult the preloaded skill content first.**
+
 Based on the `--scope` option:
 
-| Scope | Skills to Invoke |
-|-------|------------------|
-| `all` | All 8 skills below |
-| `security` | security-review, critical-issues |
+| Scope | Skills to Apply |
+|-------|-----------------|
+| `all` | All 8 review skills below, plus reference skills as needed |
+| `security` | security-review, critical-issues, plus privacy-patterns and zero-knowledge for context |
 
-**Skills** (in priority order):
+**Review skills** (in priority order):
 
-1. **security-review** - Vulnerabilities, ZK attacks, access control
-2. **critical-issues** - Bugs, logic errors, assertion problems
-3. **performance-review** - Circuit efficiency, constraint optimization
-4. **design-architecture** - Patterns, structure, modularity
-5. **best-practices** - Idiomatic Compact, common mistakes
-6. **code-quality** - Naming, organization, documentation
-7. **testing-review** - Coverage, edge cases
-8. **maintainability** - Technical debt, upgrade paths
+1. **security-review** — Apply when checking for vulnerabilities, ZK attacks, access control, privacy leaks
+2. **critical-issues** — Apply when checking for bugs, logic errors, assertion problems, state corruption
+3. **performance-review** — Apply when checking circuit efficiency, constraint count, proof size
+4. **design-architecture** — Apply when evaluating patterns, modularity, state separation, structure
+5. **best-practices** — Apply when checking for idiomatic Compact usage, common mistakes, anti-patterns
+6. **code-quality** — Apply when evaluating naming, organization, documentation, readability
+7. **testing-review** — Apply when assessing test coverage, edge cases, missing scenarios
+8. **maintainability** — Apply when evaluating technical debt, upgrade paths, long-term maintenance
 
-**For each skill**: Apply the review guidelines from the preloaded skill content, collect findings.
+**Reference skills** (cross-plugin, consult during review as needed):
+
+- When validating **type usage, circuit syntax, or witness signatures** — consult `language-reference` (compact-core)
+- When evaluating **disclosure correctness or commitment/nullifier usage** — consult `privacy-disclosure` (compact-core)
+- When reviewing **Counter, Map, Set, MerkleTree usage** — consult `ledger-adts` (compact-core)
+- When checking **standard library function usage** — consult `standard-library` (compact-core)
+- When assessing **test adequacy or debugging approaches** — consult `testing-debugging` (compact-core)
+- When reviewing **TypeScript witness implementations** — consult `typescript-integration` (compact-core)
+- When comparing against **known good patterns** — consult `contract-patterns` (compact-core)
+- When checking **build config or compilation issues** — consult `compilation-tooling` (compact-core)
+- When suggesting **starter templates or examples** — consult `clone-examples` (compact-core)
+- When validating **ZK proof constraints or circuit correctness** — consult `zero-knowledge` (midnight-core-concepts)
+- When evaluating **privacy model correctness** — consult `privacy-patterns` (midnight-core-concepts)
+- When checking **proof generation feasibility or performance** — consult `proof-generation` (midnight-proofs)
+- When validating **verification logic** — consult `proof-verification` (midnight-proofs)
+
+**For each review skill**: Apply the review guidelines from the preloaded skill content, collect findings.
 
 ### 4. Aggregate Findings
 
@@ -275,14 +293,3 @@ For directories with multiple `.compact` files:
 | 🟣 Enhancement | Optimization opportunity | Constraint reduction, witness refactoring |
 | ✨ Highlight | Good patterns to reinforce | Clean separation, proper disclosure, efficient circuits |
 
-## Compact-Core Integration
-
-This agent depends on the `compact-core` plugin for:
-
-- Type system reference
-- Standard library knowledge
-- Privacy model understanding
-- Ledger ADT patterns
-- Compilation tooling context
-
-Always reference compact-core skills when explaining Compact-specific concepts.
