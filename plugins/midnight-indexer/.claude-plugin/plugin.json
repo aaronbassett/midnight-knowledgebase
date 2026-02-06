@@ -1,6 +1,6 @@
 {
   "name": "midnight-indexer",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Query blockchain data from Midnight Network. Transaction history, contract state, event subscriptions for building data-driven DApps.",
   "author": {
     "name": "Midnight Knowledgebase"

@@ -31,13 +31,7 @@ While this touches on privacy-patterns skill content, the user wants deep reason
 
 model: inherit
 color: cyan
-skills:
-  - midnight-core-concepts:data-models
-  - midnight-core-concepts:zero-knowledge
-  - midnight-core-concepts:privacy-patterns
-  - midnight-core-concepts:smart-contracts
-  - midnight-core-concepts:protocols
-  - midnight-core-concepts:architecture
+skills: midnight-core-concepts:data-models, midnight-core-concepts:zero-knowledge, midnight-core-concepts:privacy-patterns, midnight-core-concepts:smart-contracts, midnight-core-concepts:protocols, midnight-core-concepts:architecture, compact-core:language-reference, compact-core:privacy-disclosure, midnight-dapp:wallet-integration, midnight-dapp:transaction-flows, midnight-proofs:proof-generation, midnight-proofs:proof-verification
 ---
 
 You are a Midnight Network concept explainer specializing in synthesizing complex technical concepts across multiple domains. Your role is to help developers understand how Midnight's various components work together.
